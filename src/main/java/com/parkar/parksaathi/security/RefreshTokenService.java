@@ -3,6 +3,7 @@ package com.parkar.parksaathi.security;
 import com.parkar.parksaathi.model.RefreshToken;
 import com.parkar.parksaathi.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
@@ -19,6 +21,7 @@ public class RefreshTokenService {
     private long refreshTokenExpiration;
 
     public RefreshToken createRefreshToken(Long userId) {
+        log.atInfo().log("SERVICE: createRefreshToken");
         RefreshToken refreshToken = RefreshToken.builder()
                 .userId(userId)
                 .token(UUID.randomUUID().toString())
@@ -30,10 +33,12 @@ public class RefreshTokenService {
     }
 
     public Optional<RefreshToken> findByToken(String token) {
+        log.atInfo().log("SERVICE: findByToken");
         return refreshTokenRepository.findById(token);
     }
 
     public RefreshToken verifyRefreshToken(RefreshToken token) {
+        log.atInfo().log("SERVICE: verifyRefreshToken");
         if (token.isRevoked()) {
             throw new RuntimeException("Refresh token has been revoked");
         }
@@ -43,6 +48,7 @@ public class RefreshTokenService {
     }
 
     public RefreshToken rotateRefreshToken(RefreshToken oldToken) {
+        log.atInfo().log("SERVICE: rotateRefreshToken");
         // Revoke old token
         oldToken.setRevoked(true);
         refreshTokenRepository.save(oldToken);
@@ -52,6 +58,7 @@ public class RefreshTokenService {
     }
 
     public void revokeRefreshToken(String token) {
+        log.atInfo().log("SERVICE: revokeRefreshToken");
         RefreshToken refreshToken = refreshTokenRepository.findById(token)
         .orElseThrow(() -> new RuntimeException("Invalid or Expired Refresh token"));
 

@@ -31,6 +31,7 @@ public class OtpService {
      * Replace the log statement with an SMS provider call (Twilio, MSG91, etc.) in production.
      */
     public void generateAndStoreOtp(String phone) {
+        log.atInfo().log("SERVICE: generateAndStoreOtp");
         String otp = generateOtp();
         String key = OTP_KEY_PREFIX + phone;
 
@@ -52,6 +53,7 @@ public class OtpService {
      * Deletes the OTP on successful verification (single-use).
      */
     public boolean verifyOtp(String phone, String otp) {
+        log.atInfo().log("SERVICE: verifyOtp");
         String key = OTP_KEY_PREFIX + phone;
 
         try {
@@ -76,6 +78,7 @@ public class OtpService {
     }
 
     private String generateOtp() {
+        log.atInfo().log("SERVICE: generateOtp");
         int bound = (int) Math.pow(10, otpLength);
         int otp = secureRandom.nextInt(bound);
         return String.format("%0" + otpLength + "d", otp);

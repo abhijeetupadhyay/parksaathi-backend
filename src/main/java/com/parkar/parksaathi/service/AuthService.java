@@ -9,10 +9,12 @@ import com.parkar.parksaathi.repository.UserRepository;
 import com.parkar.parksaathi.security.JwtService;
 import com.parkar.parksaathi.security.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -20,12 +22,14 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
 
     public UserStatus getUserStatus(String phone) {
+        log.atInfo().log("SERVICE: getUserStatus");
         return userRepository.findByPhone(phone)
                 .map(Users::getStatus)
                 .orElse(UserStatus.PENDING);
     }
 
     public AuthResponse signIn(String phone) {
+        log.atInfo().log("SERVICE: signIn");
         Users user = userRepository.findByPhone(phone)
                 .orElseGet(() -> {
                     Users newUser = new Users();
@@ -48,6 +52,7 @@ public class AuthService {
     }
 
     public AuthResponse refreshToken(String refreshTokenStr) {
+        log.atInfo().log("SERVICE: refreshToken");
         RefreshToken storedToken = refreshTokenService.findByToken(refreshTokenStr)
                 .orElseThrow(() -> new RuntimeException("Refresh token not found"));
 
@@ -72,10 +77,12 @@ public class AuthService {
     }
 
     public void signOut(String refreshTokenStr) {
+        log.atInfo().log("SERVICE: signOut");
         refreshTokenService.revokeRefreshToken(refreshTokenStr);
     }
 
     public void signup(SignupRequest request, Users currentUser) {
+        log.atInfo().log("SERVICE: signup");
         currentUser.setName(request.getName());
         currentUser.setEmail(request.getEmail());
         currentUser.setAadhaar(request.getAadhar());

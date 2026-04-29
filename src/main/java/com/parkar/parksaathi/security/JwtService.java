@@ -5,6 +5,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
+@Slf4j
 public class JwtService {
 
     @Value("${jwt.secret}")
@@ -27,12 +29,14 @@ public class JwtService {
     private long refreshTokenExpiration;
 
     public String generateAccessToken(Users user) {
+        log.atInfo().log("SERVICE: generateAccessToken");
         Map<String, Object> claims = new HashMap<>();
         claims.put("phone", user.getPhone());
         return buildToken(claims, user.getPhone(), accessTokenExpiration);
     }
 
     public String extractPhone(String token) {
+        log.atInfo().log("SERVICE: extractPhone");
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -41,6 +45,7 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token) {
+        log.atInfo().log("SERVICE: isTokenValid");
         try {
             return !isTokenExpired(token);
         } catch (Exception e) {
@@ -53,6 +58,7 @@ public class JwtService {
     }
 
     private String buildToken(Map<String, Object> extraClaims, String subject, long expiration) {
+        log.atInfo().log("SERVICE: buildToken");
         return Jwts.builder()
                 .claims(extraClaims)
                 .subject(subject)
