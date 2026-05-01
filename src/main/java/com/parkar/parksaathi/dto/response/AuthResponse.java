@@ -1,10 +1,10 @@
-package com.parkar.parksaathi.dto;
+package com.parkar.parksaathi.dto.response;
 
+import com.parkar.parksaathi.enums.UserStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import com.parkar.parksaathi.enums.UserStatus;
 
 
 @Data

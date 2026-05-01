@@ -1,8 +1,9 @@
 package com.parkar.parksaathi.service;
 
-import com.parkar.parksaathi.dto.AuthResponse;
-import com.parkar.parksaathi.dto.SignupRequest;
+import com.parkar.parksaathi.dto.request.SignupRequest;
+import com.parkar.parksaathi.dto.response.AuthResponse;
 import com.parkar.parksaathi.enums.UserStatus;
+import com.parkar.parksaathi.exception.customexceptions.ResourceNotFoundException;
 import com.parkar.parksaathi.model.RefreshToken;
 import com.parkar.parksaathi.model.Users;
 import com.parkar.parksaathi.repository.UserRepository;
@@ -22,16 +23,15 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
 
     public UserStatus getUserStatus(String phone) {
-        log.atInfo().log("SERVICE: getUserStatus");
         return userRepository.findByPhone(phone)
                 .map(Users::getStatus)
                 .orElse(UserStatus.PENDING);
     }
 
     public AuthResponse signIn(String phone) {
-        log.atInfo().log("SERVICE: signIn");
         Users user = userRepository.findByPhone(phone)
                 .orElseGet(() -> {
+                    log.info("Creating new user for phone: {}", phone);
                     Users newUser = new Users();
                     newUser.setPhone(phone);
                     newUser.setName("Batman");
@@ -42,6 +42,7 @@ public class AuthService {
         String accessToken = jwtService.generateAccessToken(user);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
 
+        log.info("User {} signed in successfully", phone);
         return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken.getToken())
@@ -52,9 +53,8 @@ public class AuthService {
     }
 
     public AuthResponse refreshToken(String refreshTokenStr) {
-        log.atInfo().log("SERVICE: refreshToken");
         RefreshToken storedToken = refreshTokenService.findByToken(refreshTokenStr)
-                .orElseThrow(() -> new RuntimeException("Refresh token not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Refresh token not found"));
 
         // Verify the token is valid (not expired, not revoked)
         refreshTokenService.verifyRefreshToken(storedToken);
@@ -64,9 +64,10 @@ public class AuthService {
 
         // Generate new access token
         Users user = userRepository.findById(storedToken.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         String newAccessToken = jwtService.generateAccessToken(user);
 
+        log.info("Token refreshed for user ID: {}", user.getId());
         return AuthResponse.builder()
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken.getToken())
@@ -77,16 +78,16 @@ public class AuthService {
     }
 
     public void signOut(String refreshTokenStr) {
-        log.atInfo().log("SERVICE: signOut");
         refreshTokenService.revokeRefreshToken(refreshTokenStr);
+        log.info("User signed out successfully");
     }
 
     public void signup(SignupRequest request, Users currentUser) {
-        log.atInfo().log("SERVICE: signup");
         currentUser.setName(request.getName());
         currentUser.setEmail(request.getEmail());
         currentUser.setAadhaar(request.getAadhar());
         currentUser.setStatus(UserStatus.ACTIVE);
         userRepository.save(currentUser);
+        log.info("User {} completed signup", currentUser.getPhone());
     }
 }

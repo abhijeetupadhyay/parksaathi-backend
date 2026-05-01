@@ -1,4 +1,4 @@
-package com.parkar.parksaathi.dto;
+package com.parkar.parksaathi.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

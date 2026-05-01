@@ -1,0 +1,296 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "ParkSaathi API",
+        "version": "v1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8080",
+            "description": "Generated server url"
+        }
+    ],
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ],
+    "paths": {
+        "/auth/v1/verify-otp": {
+            "post": {
+                "tags": [
+                    "auth-controller"
+                ],
+                "operationId": "verifyOtp",
+                "parameters": [
+                    { "$ref": "#/components/parameters/x-parksaathi-device" },
+                    { "$ref": "#/components/parameters/x-parksaathi-correlation-id" },
+                    { "$ref": "#/components/parameters/x-parksaathi-version" }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerifyOtpRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/v1/signup": {
+            "post": {
+                "tags": [
+                    "auth-controller"
+                ],
+                "operationId": "signup",
+                "parameters": [
+                    { "$ref": "#/components/parameters/x-parksaathi-device" },
+                    { "$ref": "#/components/parameters/x-parksaathi-correlation-id" },
+                    { "$ref": "#/components/parameters/x-parksaathi-version" }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignupRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/v1/signout": {
+            "post": {
+                "tags": [
+                    "auth-controller"
+                ],
+                "operationId": "signOut",
+                "parameters": [
+                    { "$ref": "#/components/parameters/x-parksaathi-device" },
+                    { "$ref": "#/components/parameters/x-parksaathi-correlation-id" },
+                    { "$ref": "#/components/parameters/x-parksaathi-version" }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RefreshTokenRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/v1/send-otp": {
+            "post": {
+                "tags": [
+                    "auth-controller"
+                ],
+                "operationId": "sendOtp",
+                "parameters": [
+                    { "$ref": "#/components/parameters/x-parksaathi-device" },
+                    { "$ref": "#/components/parameters/x-parksaathi-correlation-id" },
+                    { "$ref": "#/components/parameters/x-parksaathi-version" }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SendOtpRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/v1/refresh": {
+            "post": {
+                "tags": [
+                    "auth-controller"
+                ],
+                "operationId": "refreshToken",
+                "parameters": [
+                    { "$ref": "#/components/parameters/x-parksaathi-device" },
+                    { "$ref": "#/components/parameters/x-parksaathi-correlation-id" },
+                    { "$ref": "#/components/parameters/x-parksaathi-version" }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RefreshTokenRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "parameters": {
+            "x-parksaathi-device": {
+                "name": "x-parksaathi-device",
+                "in": "header",
+                "description": "Device type (mobile/web)",
+                "required": true,
+                "schema": {
+                    "type": "string",
+                    "enum": [
+                        "mobile",
+                        "web"
+                    ]
+                }
+            },
+            "x-parksaathi-correlation-id": {
+                "name": "x-parksaathi-correlation-id",
+                "in": "header",
+                "description": "Correlation ID (UUID)",
+                "required": true,
+                "schema": {
+                    "type": "string",
+                    "format": "uuid"
+                }
+            },
+            "x-parksaathi-version": {
+                "name": "x-parksaathi-version",
+                "in": "header",
+                "description": "API Version (1.0.0)",
+                "required": true,
+                "schema": {
+                    "type": "string",
+                    "default": "1.0.0"
+                }
+            }
+        },
+        "schemas": {
+            "VerifyOtpRequest": {
+                "required": [
+                    "otp",
+                    "phone"
+                ],
+                "type": "object",
+                "properties": {
+                    "phone": {
+                        "type": "string"
+                    },
+                    "otp": {
+                        "type": "string"
+                    }
+                }
+            },
+            "SignupRequest": {
+                "required": [
+                    "name"
+                ],
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "aadhar": {
+                        "type": "string"
+                    }
+                }
+            },
+            "RefreshTokenRequest": {
+                "required": [
+                    "refreshToken"
+                ],
+                "type": "object",
+                "properties": {
+                    "refreshToken": {
+                        "type": "string"
+                    }
+                }
+            },
+            "SendOtpRequest": {
+                "required": [
+                    "phone"
+                ],
+                "type": "object",
+                "properties": {
+                    "phone": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "name": "bearerAuth",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    }
+}

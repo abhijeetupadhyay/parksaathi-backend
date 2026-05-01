@@ -1,5 +1,7 @@
 package com.parkar.parksaathi.security;
 
+import com.parkar.parksaathi.exception.customexceptions.ResourceNotFoundException;
+import com.parkar.parksaathi.exception.customexceptions.UnauthorizedException;
 import com.parkar.parksaathi.model.RefreshToken;
 import com.parkar.parksaathi.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +42,7 @@ public class RefreshTokenService {
     public RefreshToken verifyRefreshToken(RefreshToken token) {
         log.atInfo().log("SERVICE: verifyRefreshToken");
         if (token.isRevoked()) {
-            throw new RuntimeException("Refresh token has been revoked");
+            throw new UnauthorizedException("Refresh token has been revoked");
         }
         // Expiration is handled automatically by Redis via @TimeToLive
         // But if it was fetched, it hasn't expired in Redis yet
@@ -60,9 +62,9 @@ public class RefreshTokenService {
     public void revokeRefreshToken(String token) {
         log.atInfo().log("SERVICE: revokeRefreshToken");
         RefreshToken refreshToken = refreshTokenRepository.findById(token)
-        .orElseThrow(() -> new RuntimeException("Invalid or Expired Refresh token"));
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid or Expired Refresh token"));
 
-    refreshToken.setRevoked(true);
-    refreshTokenRepository.save(refreshToken);
+        refreshToken.setRevoked(true);
+        refreshTokenRepository.save(refreshToken);
     }
 }

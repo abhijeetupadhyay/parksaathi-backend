@@ -2,6 +2,7 @@ package com.parkar.parksaathi.config;
 
 import com.parkar.parksaathi.security.AuthEntryPoint;
 import com.parkar.parksaathi.security.JwtAuthenticationFilter;
+import com.parkar.parksaathi.security.MandatoryHeaderFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final MandatoryHeaderFilter mandatoryHeaderFilter;
     private final AuthEntryPoint authEntryPoint;
 
     @Bean
@@ -35,6 +37,7 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
                 )
+                .addFilterBefore(mandatoryHeaderFilter, org.springframework.security.web.authentication.logout.LogoutFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

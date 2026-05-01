@@ -1,10 +1,11 @@
 package com.parkar.parksaathi.service;
 
+import com.parkar.parksaathi.exception.customexceptions.AppException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -31,20 +32,19 @@ public class OtpService {
      * Replace the log statement with an SMS provider call (Twilio, MSG91, etc.) in production.
      */
     public void generateAndStoreOtp(String phone) {
-        log.atInfo().log("SERVICE: generateAndStoreOtp");
         String otp = generateOtp();
         String key = OTP_KEY_PREFIX + phone;
 
         try {
             // Set OTP in Redis with expiration
             redisTemplate.opsForValue().set(key, otp, otpExpirationSeconds, TimeUnit.SECONDS);
-            log.info("OTP generated for phone {}: {}", phone, otp);
+            log.info("OTP generated and stored for phone {}", phone);
 
             // TODO: Send OTP via SMS provider
             // smsService.sendSms(phone, "Your ParkSaathi OTP is: " + otp);
         } catch (Exception e) {
             log.error("Failed to store OTP in Redis for phone: {}", phone, e);
-            throw new RuntimeException("Failed to generate OTP. Please try again.");
+            throw new AppException("Failed to generate OTP. Please try again.");
         }
     }
 
@@ -53,32 +53,35 @@ public class OtpService {
      * Deletes the OTP on successful verification (single-use).
      */
     public boolean verifyOtp(String phone, String otp) {
-        log.atInfo().log("SERVICE: verifyOtp");
         String key = OTP_KEY_PREFIX + phone;
 
         try {
             String storedOtp = redisTemplate.opsForValue().get(key);
 
             if (storedOtp == null) {
-                throw new RuntimeException("OTP has expired or was not generated. Please request a new OTP.");
+                log.warn("OTP verification failed: OTP expired or not found for phone {}", phone);
+                throw new AppException("OTP has expired or was not generated. Please request a new OTP.");
             }
 
             if (!storedOtp.equals(otp)) {
-                throw new RuntimeException("Invalid OTP. Please try again.");
+                log.warn("OTP verification failed: Invalid OTP for phone {}", phone);
+                throw new AppException("Invalid OTP. Please try again.");
             }
 
             // OTP verified — delete it (single-use)
             redisTemplate.delete(key);
+            log.info("OTP verified and deleted for phone {}", phone);
             return true;
 
+        } catch (AppException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Failed to verify OTP from Redis for phone: {}", phone, e);
-            throw new RuntimeException("OTP verification failed. Please try again.");
+            throw new AppException("OTP verification failed. Please try again.");
         }
     }
 
     private String generateOtp() {
-        log.atInfo().log("SERVICE: generateOtp");
         int bound = (int) Math.pow(10, otpLength);
         int otp = secureRandom.nextInt(bound);
         return String.format("%0" + otpLength + "d", otp);

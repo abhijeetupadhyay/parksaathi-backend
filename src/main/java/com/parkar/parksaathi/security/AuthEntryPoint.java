@@ -1,7 +1,7 @@
 package com.parkar.parksaathi.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.parkar.parksaathi.dto.ApiErrorResponse;
+import com.parkar.parksaathi.dto.response.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;

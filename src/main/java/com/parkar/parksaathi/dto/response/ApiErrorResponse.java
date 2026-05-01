@@ -1,4 +1,4 @@
-package com.parkar.parksaathi.dto;
+package com.parkar.parksaathi.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
