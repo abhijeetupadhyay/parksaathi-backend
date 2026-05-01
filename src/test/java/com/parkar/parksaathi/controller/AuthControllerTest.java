@@ -59,7 +59,7 @@ class AuthControllerTest {
         doNothing().when(otpService).generateAndStoreOtp("1234567890");
         when(authService.getUserStatus("1234567890")).thenReturn(UserStatus.ACTIVE);
 
-        mockMvc.perform(post(AUTH + V1_SEND_OTP)
+        mockMvc.perform(post(AUTH + VERSION1 + SEND_OTP_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -74,7 +74,7 @@ class AuthControllerTest {
 
         doThrow(new RuntimeException("OTP error")).when(otpService).generateAndStoreOtp(anyString());
 
-        mockMvc.perform(post(AUTH + V1_SEND_OTP)
+        mockMvc.perform(post(AUTH + VERSION1 + SEND_OTP_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isInternalServerError())
@@ -96,7 +96,7 @@ class AuthControllerTest {
                 .build();
         when(authService.signIn("1234567890")).thenReturn(response);
 
-        mockMvc.perform(post(AUTH + V1_VERIFY_OTP)
+        mockMvc.perform(post(AUTH + VERSION1 + VERIFY_OTP_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -111,7 +111,7 @@ class AuthControllerTest {
 
         when(otpService.verifyOtp("1234567890", "123456")).thenThrow(new UnauthorizedException("Invalid OTP"));
 
-        mockMvc.perform(post(AUTH + V1_VERIFY_OTP)
+        mockMvc.perform(post(AUTH + VERSION1 + VERIFY_OTP_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
@@ -126,7 +126,7 @@ class AuthControllerTest {
         AuthResponse response = AuthResponse.builder().accessToken("new-access").build();
         when(authService.refreshToken("refresh")).thenReturn(response);
 
-        mockMvc.perform(post(AUTH + V1_REFRESH)
+        mockMvc.perform(post(AUTH + VERSION1 + REFRESH_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -140,7 +140,7 @@ class AuthControllerTest {
 
         doNothing().when(authService).signOut("refresh");
 
-        mockMvc.perform(post(AUTH + V1_SIGNOUT)
+        mockMvc.perform(post(AUTH + VERSION1 + SIGNOUT_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -160,7 +160,7 @@ class AuthControllerTest {
         // or we can test the service invocation.
         doNothing().when(authService).signup(any(SignupRequest.class), any());
 
-        mockMvc.perform(post(AUTH + V1_SIGNUP)
+        mockMvc.perform(post(AUTH + VERSION1 + SIGNUP_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
