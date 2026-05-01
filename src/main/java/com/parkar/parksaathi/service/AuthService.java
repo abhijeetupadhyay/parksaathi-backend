@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -36,6 +38,8 @@ public class AuthService {
                     newUser.setPhone(phone);
                     newUser.setName("Batman");
                     newUser.setStatus(UserStatus.PENDING);
+                    newUser.setCreatedAt(LocalDateTime.now());
+                    newUser.setUpdatedAt(LocalDateTime.now());
                     return userRepository.save(newUser);
                 });
 
@@ -87,6 +91,7 @@ public class AuthService {
         currentUser.setEmail(request.getEmail());
         currentUser.setAadhaar(request.getAadhar());
         currentUser.setStatus(UserStatus.ACTIVE);
+        currentUser.setUpdatedAt(LocalDateTime.now());
         userRepository.save(currentUser);
         log.info("User {} completed signup", currentUser.getPhone());
     }

@@ -10,5 +10,4 @@ import lombok.*;
 public class SendOtpResponse {
     String message;
     Integer expiresInSeconds;
-    String userStatus;
 }

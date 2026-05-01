@@ -36,11 +36,9 @@ public class AuthController {
     @PostMapping(VERSION1 + SEND_OTP_ENDPOINT)
     public ResponseEntity<?> sendOtp(@Valid @RequestBody SendOtpRequest request) {
         otpService.generateAndStoreOtp(request.getPhone());
-        com.parkar.parksaathi.enums.UserStatus status = authService.getUserStatus(request.getPhone());
         SendOtpResponse sendOtpResponse = SendOtpResponse.builder()
                 .message("otp sent")
                 .expiresInSeconds(otpExpirationSeconds)
-                .userStatus(status.name())
                 .build();
         return ResponseEntity.ok(sendOtpResponse);
     }
