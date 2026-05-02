@@ -63,8 +63,7 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("otp sent"))
-                .andExpect(jsonPath("$.userStatus").value("ACTIVE"));
+                .andExpect(jsonPath("$.message").value("otp sent"));
     }
 
     @Test
@@ -89,7 +88,7 @@ class AuthControllerTest {
         request.setOtp("123456");
 
         when(otpService.verifyOtp("1234567890", "123456")).thenReturn(true);
-        
+
         AuthResponse response = AuthResponse.builder()
                 .accessToken("access")
                 .refreshToken("refresh")

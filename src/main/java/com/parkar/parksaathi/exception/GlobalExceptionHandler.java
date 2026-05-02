@@ -3,6 +3,7 @@ package com.parkar.parksaathi.exception;
 import com.parkar.parksaathi.dto.response.ApiErrorResponse;
 import com.parkar.parksaathi.exception.customexceptions.AppException;
 import com.parkar.parksaathi.exception.customexceptions.ResourceNotFoundException;
+import com.parkar.parksaathi.exception.customexceptions.TokenRefreshException;
 import com.parkar.parksaathi.exception.customexceptions.UnauthorizedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -45,6 +46,17 @@ public class GlobalExceptionHandler {
         ApiErrorResponse error = ApiErrorResponse.builder()
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .error("Unauthorized")
+                .message(e.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
+    @ExceptionHandler(TokenRefreshException.class)
+    public ResponseEntity<ApiErrorResponse> handleTokenRefreshException(TokenRefreshException e) {
+        log.warn("Token refresh failed: {}", e.getMessage());
+        ApiErrorResponse error = ApiErrorResponse.builder()
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .error("Token Refresh Error")
                 .message(e.getMessage())
                 .build();
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);

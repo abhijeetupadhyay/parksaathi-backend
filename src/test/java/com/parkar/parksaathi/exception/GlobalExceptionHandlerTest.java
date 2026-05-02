@@ -3,6 +3,7 @@ package com.parkar.parksaathi.exception;
 import com.parkar.parksaathi.dto.response.ApiErrorResponse;
 import com.parkar.parksaathi.exception.customexceptions.AppException;
 import com.parkar.parksaathi.exception.customexceptions.ResourceNotFoundException;
+import com.parkar.parksaathi.exception.customexceptions.TokenRefreshException;
 import com.parkar.parksaathi.exception.customexceptions.UnauthorizedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,6 +60,16 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void testHandleTokenRefreshException() {
+        TokenRefreshException ex = new TokenRefreshException("some-token", "Token expired");
+        ResponseEntity<ApiErrorResponse> response = handler.handleTokenRefreshException(ex);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals("Failed for [some-token]: Token expired", response.getBody().getMessage());
+        assertEquals("Token Refresh Error", response.getBody().getError());
+    }
+
+    @Test
     void testHandleRuntimeException() {
         RuntimeException ex = new RuntimeException("Unexpected runtime error");
         ResponseEntity<ApiErrorResponse> response = handler.handleRuntimeException(ex);
@@ -73,7 +84,7 @@ class GlobalExceptionHandlerTest {
         MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
         BindingResult bindingResult = mock(BindingResult.class);
         FieldError fieldError = new FieldError("object", "field", "must not be null");
-        
+
         when(ex.getBindingResult()).thenReturn(bindingResult);
         when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
 

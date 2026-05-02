@@ -4,6 +4,7 @@ import com.parkar.parksaathi.dto.request.SignupRequest;
 import com.parkar.parksaathi.dto.response.AuthResponse;
 import com.parkar.parksaathi.enums.UserStatus;
 import com.parkar.parksaathi.exception.customexceptions.ResourceNotFoundException;
+import com.parkar.parksaathi.exception.customexceptions.TokenRefreshException;
 import com.parkar.parksaathi.model.RefreshToken;
 import com.parkar.parksaathi.model.Users;
 import com.parkar.parksaathi.repository.UserRepository;
@@ -58,7 +59,7 @@ public class AuthService {
 
     public AuthResponse refreshToken(String refreshTokenStr) {
         RefreshToken storedToken = refreshTokenService.findByToken(refreshTokenStr)
-                .orElseThrow(() -> new ResourceNotFoundException("Refresh token not found"));
+                .orElseThrow(() -> new TokenRefreshException(refreshTokenStr, "Refresh token not found in storage"));
 
         // Verify the token is valid (not expired, not revoked)
         refreshTokenService.verifyRefreshToken(storedToken);

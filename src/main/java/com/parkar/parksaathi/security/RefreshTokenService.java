@@ -1,59 +1,76 @@
 package com.parkar.parksaathi.security;
 
-import com.parkar.parksaathi.exception.customexceptions.ResourceNotFoundException;
-import com.parkar.parksaathi.exception.customexceptions.UnauthorizedException;
+import com.parkar.parksaathi.exception.customexceptions.TokenRefreshException;
 import com.parkar.parksaathi.model.RefreshToken;
-import com.parkar.parksaathi.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class RefreshTokenService {
 
-    private final RefreshTokenRepository refreshTokenRepository;
+    private static final String REFRESH_TOKEN_PREFIX = "rfrsh_tkn:";
+    private final StringRedisTemplate redisTemplate;
 
     @Value("${jwt.refresh-token-expiration}")
     private long refreshTokenExpiration;
 
     public RefreshToken createRefreshToken(Long userId) {
-        log.atInfo().log("SERVICE: createRefreshToken");
-        RefreshToken refreshToken = RefreshToken.builder()
-                .userId(userId)
-                .token(UUID.randomUUID().toString())
-                .timeToLive(refreshTokenExpiration / 1000) // Convert ms to seconds
-                .revoked(false)
-                .build();
+        log.atInfo().log("SERVICE: createRefreshToken for userId: {}", userId);
+        String token = UUID.randomUUID().toString();
+        String key = REFRESH_TOKEN_PREFIX + token;
 
-        return refreshTokenRepository.save(refreshToken);
+        redisTemplate.opsForValue().set(key, userId.toString(), refreshTokenExpiration, TimeUnit.MILLISECONDS);
+
+        return RefreshToken.builder()
+                .userId(userId)
+                .token(token)
+                .build();
     }
 
     public Optional<RefreshToken> findByToken(String token) {
         log.atInfo().log("SERVICE: findByToken");
-        return refreshTokenRepository.findById(token);
+        String key = REFRESH_TOKEN_PREFIX + token;
+        String userIdStr = redisTemplate.opsForValue().get(key);
+
+        if (userIdStr == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(RefreshToken.builder()
+                .token(token)
+                .userId(Long.parseLong(userIdStr))
+                .build());
     }
 
     public RefreshToken verifyRefreshToken(RefreshToken token) {
         log.atInfo().log("SERVICE: verifyRefreshToken");
-        if (token.isRevoked()) {
-            throw new UnauthorizedException("Refresh token has been revoked");
+        if (token == null) {
+            throw new TokenRefreshException("null", "Refresh token is null");
         }
-        // Expiration is handled automatically by Redis via @TimeToLive
-        // But if it was fetched, it hasn't expired in Redis yet
+        // Ensure token is still present and valid in Redis.
+        // Presence in Redis signifies validity as we use TTL for expiration.
+        String key = REFRESH_TOKEN_PREFIX + token.getToken();
+        if (Boolean.FALSE.equals(redisTemplate.hasKey(key))) {
+            log.warn("Token validation failed: Token not found, or expired. {}", token.getToken());
+            throw new TokenRefreshException(token.getToken(), "Refresh token was not found or has expired");
+        }
+
         return token;
     }
 
     public RefreshToken rotateRefreshToken(RefreshToken oldToken) {
         log.atInfo().log("SERVICE: rotateRefreshToken");
-        // Revoke old token
-        oldToken.setRevoked(true);
-        refreshTokenRepository.save(oldToken);
+        // Delete old token
+        revokeRefreshToken(oldToken.getToken());
 
         // Create new token for the same user
         return createRefreshToken(oldToken.getUserId());
@@ -61,10 +78,10 @@ public class RefreshTokenService {
 
     public void revokeRefreshToken(String token) {
         log.atInfo().log("SERVICE: revokeRefreshToken");
-        RefreshToken refreshToken = refreshTokenRepository.findById(token)
-                .orElseThrow(() -> new ResourceNotFoundException("Invalid or Expired Refresh token"));
-
-        refreshToken.setRevoked(true);
-        refreshTokenRepository.save(refreshToken);
+        String key = REFRESH_TOKEN_PREFIX + token;
+        Boolean deleted = redisTemplate.delete(key);
+        if (Boolean.FALSE.equals(deleted)) {
+            log.warn("Attempted to revoke non-existent or already expired token: {}", token);
+        }
     }
 }

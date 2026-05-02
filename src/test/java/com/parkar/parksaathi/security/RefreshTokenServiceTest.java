@@ -1,18 +1,19 @@
 package com.parkar.parksaathi.security;
 
-import com.parkar.parksaathi.exception.customexceptions.ResourceNotFoundException;
-import com.parkar.parksaathi.exception.customexceptions.UnauthorizedException;
+import com.parkar.parksaathi.exception.customexceptions.TokenRefreshException;
 import com.parkar.parksaathi.model.RefreshToken;
-import com.parkar.parksaathi.repository.RefreshTokenRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,12 +23,16 @@ import static org.mockito.Mockito.*;
 class RefreshTokenServiceTest {
 
     @Mock
-    private RefreshTokenRepository refreshTokenRepository;
+    private StringRedisTemplate redisTemplate;
+
+    @Mock
+    private ValueOperations<String, String> valueOperations;
 
     @InjectMocks
     private RefreshTokenService refreshTokenService;
 
     private long refreshTokenExpiration = 604800000L; // 7 days
+    private static final String REFRESH_TOKEN_PREFIX = "rfrsh_tkn:";
 
     @BeforeEach
     void setUp() {
@@ -37,41 +42,47 @@ class RefreshTokenServiceTest {
     @Test
     void testCreateRefreshToken() {
         Long userId = 1L;
-        RefreshToken mockToken = RefreshToken.builder()
-                .userId(userId)
-                .token("sample-token")
-                .timeToLive(refreshTokenExpiration / 1000)
-                .revoked(false)
-                .build();
-
-        when(refreshTokenRepository.save(any(RefreshToken.class))).thenReturn(mockToken);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         RefreshToken result = refreshTokenService.createRefreshToken(userId);
 
         assertNotNull(result);
         assertEquals(userId, result.getUserId());
-        assertEquals("sample-token", result.getToken());
-        verify(refreshTokenRepository, times(1)).save(any(RefreshToken.class));
+        assertNotNull(result.getToken());
+        verify(valueOperations, times(1)).set(anyString(), eq(userId.toString()), eq(refreshTokenExpiration), eq(TimeUnit.MILLISECONDS));
     }
 
     @Test
-    void testFindByToken() {
+    void testFindByToken_Success() {
         String token = "sample-token";
-        RefreshToken mockToken = new RefreshToken();
-        mockToken.setToken(token);
-
-        when(refreshTokenRepository.findById(token)).thenReturn(Optional.of(mockToken));
+        Long userId = 1L;
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.get(REFRESH_TOKEN_PREFIX + token)).thenReturn(userId.toString());
 
         Optional<RefreshToken> result = refreshTokenService.findByToken(token);
 
         assertTrue(result.isPresent());
         assertEquals(token, result.get().getToken());
+        assertEquals(userId, result.get().getUserId());
+    }
+
+    @Test
+    void testFindByToken_NotFound() {
+        String token = "invalid-token";
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.get(REFRESH_TOKEN_PREFIX + token)).thenReturn(null);
+
+        Optional<RefreshToken> result = refreshTokenService.findByToken(token);
+
+        assertTrue(result.isEmpty());
     }
 
     @Test
     void testVerifyRefreshToken_Success() {
         RefreshToken token = new RefreshToken();
-        token.setRevoked(false);
+        token.setToken("some-token");
+
+        when(redisTemplate.hasKey(REFRESH_TOKEN_PREFIX + "some-token")).thenReturn(true);
 
         RefreshToken result = refreshTokenService.verifyRefreshToken(token);
 
@@ -79,11 +90,18 @@ class RefreshTokenServiceTest {
     }
 
     @Test
-    void testVerifyRefreshToken_Revoked() {
+    void testVerifyRefreshToken_NotFound() {
         RefreshToken token = new RefreshToken();
-        token.setRevoked(true);
+        token.setToken("invalid-token");
 
-        assertThrows(UnauthorizedException.class, () -> refreshTokenService.verifyRefreshToken(token));
+        when(redisTemplate.hasKey(REFRESH_TOKEN_PREFIX + "invalid-token")).thenReturn(false);
+
+        assertThrows(TokenRefreshException.class, () -> refreshTokenService.verifyRefreshToken(token));
+    }
+
+    @Test
+    void testVerifyRefreshToken_NullToken() {
+        assertThrows(TokenRefreshException.class, () -> refreshTokenService.verifyRefreshToken(null));
     }
 
     @Test
@@ -91,42 +109,26 @@ class RefreshTokenServiceTest {
         RefreshToken oldToken = new RefreshToken();
         oldToken.setToken("old-token");
         oldToken.setUserId(1L);
-        oldToken.setRevoked(false);
 
-        RefreshToken newToken = new RefreshToken();
-        newToken.setToken("new-token");
-        newToken.setUserId(1L);
-
-        when(refreshTokenRepository.save(any(RefreshToken.class))).thenReturn(oldToken).thenReturn(newToken);
+        when(redisTemplate.delete(REFRESH_TOKEN_PREFIX + "old-token")).thenReturn(true);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         RefreshToken result = refreshTokenService.rotateRefreshToken(oldToken);
 
-        assertTrue(oldToken.isRevoked());
         assertNotNull(result);
-        verify(refreshTokenRepository, times(2)).save(any(RefreshToken.class));
+        assertNotEquals("old-token", result.getToken());
+        assertEquals(1L, result.getUserId());
+        verify(redisTemplate, times(1)).delete(REFRESH_TOKEN_PREFIX + "old-token");
+        verify(valueOperations, times(1)).set(anyString(), eq("1"), anyLong(), any());
     }
 
     @Test
-    void testRevokeRefreshToken_Success() {
+    void testRevokeRefreshToken() {
         String token = "sample-token";
-        RefreshToken refreshToken = new RefreshToken();
-        refreshToken.setToken(token);
-        refreshToken.setRevoked(false);
-
-        when(refreshTokenRepository.findById(token)).thenReturn(Optional.of(refreshToken));
-        when(refreshTokenRepository.save(refreshToken)).thenReturn(refreshToken);
+        when(redisTemplate.delete(REFRESH_TOKEN_PREFIX + token)).thenReturn(true);
 
         refreshTokenService.revokeRefreshToken(token);
 
-        assertTrue(refreshToken.isRevoked());
-        verify(refreshTokenRepository, times(1)).save(refreshToken);
-    }
-
-    @Test
-    void testRevokeRefreshToken_NotFound() {
-        String token = "invalid-token";
-        when(refreshTokenRepository.findById(token)).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class, () -> refreshTokenService.revokeRefreshToken(token));
+        verify(redisTemplate, times(1)).delete(REFRESH_TOKEN_PREFIX + token);
     }
 }
