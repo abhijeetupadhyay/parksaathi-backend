@@ -3,11 +3,16 @@ package com.parkar.parksaathi.service.parking;
 import com.parkar.parksaathi.dto.request.AddParkingRequest;
 import com.parkar.parksaathi.model.Address;
 import com.parkar.parksaathi.model.ParkingListing;
+import com.parkar.parksaathi.model.ParkingVehicleConfig;
+import com.parkar.parksaathi.repository.AddressRepository;
 import com.parkar.parksaathi.repository.FacilityRepository;
 import com.parkar.parksaathi.repository.ParkingListingRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.HashSet;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -29,7 +34,6 @@ public class ParkingService {
         Address addr = new Address();
         addr.setAddressLine1(req.getAddress().getAddressLine1());
         addr.setCity(req.getAddress().getCity());
-        addr.setPincode(req.getAddress().getPincode()); // Pincode is in your design
         addr.setLatitude(req.getAddress().getLatitude());
         addr.setLongitude(req.getAddress().getLongitude());
         listing.setAddress(addr);
@@ -56,14 +60,6 @@ public class ParkingService {
             config.setMonthlyRate(vDto.getMonthlyRate());
             config.setParking(listing);
             return config;
-        }).collect(Collectors.toList()));
-
-        // Map Images
-        listing.setImages(req.getImageUrls().stream().map(url -> {
-            ParkingImage img = new ParkingImage();
-            img.setImageUrl(url);
-            img.setParking(listing);
-            return img;
         }).collect(Collectors.toList()));
 
         return parkingRepo.save(listing).getId();
