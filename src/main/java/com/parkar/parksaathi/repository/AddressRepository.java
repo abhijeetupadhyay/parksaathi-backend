@@ -4,11 +4,14 @@ import com.parkar.parksaathi.model.Address;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-/**
- * Repository interface for Address entity.
- * Provides CRUD operations and query method support.
- */
+import java.util.List;
+
 @Repository
 public interface AddressRepository extends JpaRepository<Address, Long> {
-    // Add custom query methods here if needed
+    
+    List<Address> findByCity(String city);
+    
+    List<Address> findByState(String state);
+    
+    List<Address> findByCityAndState(String city, String state);
 }

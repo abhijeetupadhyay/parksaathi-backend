@@ -2,43 +2,49 @@ package com.parkar.parksaathi.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "address")
 @Data
+@EqualsAndHashCode(exclude = "parkingListings")
+@ToString(exclude = "parkingListings")
 public class Address {
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    
     @Column(name = "address_line1", nullable = false)
     private String addressLine1;
-
+    
     @Column(name = "address_line2")
     private String addressLine2;
-
-    @Column(length = 100)
+    
+    @Column(name = "city", length = 100)
     private String city;
-
-    @Column(length = 100)
+    
+    @Column(name = "state", length = 100)
     private String state;
-
-    @Column(precision = 10, scale = 8)
+    
+    @Column(name = "latitude", precision = 10, scale = 8)
     private BigDecimal latitude;
-
-    @Column(precision = 11, scale = 8)
+    
+    @Column(name = "longitude", precision = 11, scale = 8)
     private BigDecimal longitude;
-
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    
+    @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
+    
+    @Column(name = "updated_at", insertable = false, updatable = false)
     private LocalDateTime updatedAt;
+    
+    @OneToMany(mappedBy = "address")
+    private Set<ParkingListing> parkingListings = new HashSet<>();
 }

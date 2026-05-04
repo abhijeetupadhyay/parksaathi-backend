@@ -6,9 +6,14 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface FacilityRepository extends JpaRepository<Facility, Integer> {
-    List<Facility> findByFacilityNameIn(List<String> names);
-    Optional<Facility> findByFacilityName(String name);
+    
+    Optional<Facility> findByFacilityName(String facilityName);
+    
+    boolean existsByFacilityName(String facilityName);
+
+    Set<Facility> findByFacilityNameIn(List<String> names);
 }

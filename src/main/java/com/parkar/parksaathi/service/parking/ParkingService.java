@@ -4,6 +4,7 @@ import com.parkar.parksaathi.dto.request.AddParkingRequest;
 import com.parkar.parksaathi.model.Address;
 import com.parkar.parksaathi.model.ParkingListing;
 import com.parkar.parksaathi.model.ParkingVehicleConfig;
+import com.parkar.parksaathi.model.VehicleType;
 import com.parkar.parksaathi.repository.AddressRepository;
 import com.parkar.parksaathi.repository.FacilityRepository;
 import com.parkar.parksaathi.repository.ParkingListingRepository;
@@ -39,7 +40,7 @@ public class ParkingService {
         listing.setAddress(addr);
 
         // Map Availability
-        listing.setOpen24Hours(req.getAvailability().isOpen24Hours());
+        listing.setIsOpen24Hours(req.getAvailability().isOpen24Hours());
         listing.setStartTime(req.getAvailability().getStartTime());
         listing.setEndTime(req.getAvailability().getEndTime());
         listing.setAdStartDate(req.getAvailability().getAdStartDate());
@@ -50,9 +51,15 @@ public class ParkingService {
         listing.setFacilities(facilityRepo.findByFacilityNameIn(req.getAmenities()));
 
         // Map Vehicle Configs
+        // Map Vehicle Configs
         listing.setVehicleConfigs(req.getVehicleConfigs().stream().map(vDto -> {
             ParkingVehicleConfig config = new ParkingVehicleConfig();
-            config.setVehicleTypeId(vDto.getVehicleTypeId());
+
+            // Create VehicleType entity reference
+            VehicleType vehicleType = new VehicleType();
+            vehicleType.setId(vDto.getVehicleTypeId());
+            config.setVehicleType(vehicleType);
+
             config.setMaxCapacity(vDto.getMaxCapacity());
             config.setHourlyRate(vDto.getHourlyRate());
             config.setDailyRate(vDto.getDailyRate());
@@ -60,7 +67,7 @@ public class ParkingService {
             config.setMonthlyRate(vDto.getMonthlyRate());
             config.setParking(listing);
             return config;
-        }).collect(Collectors.toList()));
+        }).collect(Collectors.toSet()));
 
         return parkingRepo.save(listing).getId();
     }
