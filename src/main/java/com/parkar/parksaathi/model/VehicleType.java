@@ -11,14 +11,13 @@ import java.util.Set;
 @Entity
 @Table(name = "vehicle_types")
 @Data
-@EqualsAndHashCode(exclude = "vehicleConfigs")
-@ToString(exclude = "vehicleConfigs")
 public class VehicleType {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Column(name = "type_name", unique = true, nullable = false, length = 50)
+    private String typeName;
     
-    @OneToMany(mappedBy = "vehicleType")
-    private Set<ParkingVehicleConfig> vehicleConfigs = new HashSet<>();
 }

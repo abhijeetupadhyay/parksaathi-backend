@@ -59,7 +59,7 @@ CREATE TABLE parking_availability_days (
         FOREIGN KEY (parking_id) 
         REFERENCES parking_listings(id));
     
-    CREATE TABLE facilities (
+CREATE TABLE facilities (
     id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     facility_name VARCHAR(50) UNIQUE NOT NULL
 );

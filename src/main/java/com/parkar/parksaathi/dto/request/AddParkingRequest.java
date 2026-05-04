@@ -1,6 +1,7 @@
 package com.parkar.parksaathi.dto.request;
 
 import com.parkar.parksaathi.enums.DayOfWeekEnum;
+import com.parkar.parksaathi.enums.ListingStatus;
 import lombok.Data;
 
 import java.math.BigDecimal;

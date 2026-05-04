@@ -3,12 +3,15 @@ package com.parkar.parksaathi.constant;
 public final class Constants {
 
     public static final String AUTH = "/auth";
+    public static final String PARKING = "/parking";
     public static final String VERSION1 = "/v1";
     public static final String SEND_OTP_ENDPOINT = "/send-otp";
+
     public static final String VERIFY_OTP_ENDPOINT = "/verify-otp";
     public static final String REFRESH_ENDPOINT = "/refresh";
     public static final String SIGNOUT_ENDPOINT = "/signout";
     public static final String SIGNUP_ENDPOINT = "/signup";
+    public static final String CREATE_PARKING_ENDPOINT = "/spots/new";
 
     public static final String HEADER_DEVICE = "x-parksaathi-device";
     public static final String HEADER_CORRELATION_ID = "x-parksaathi-correlation-id";

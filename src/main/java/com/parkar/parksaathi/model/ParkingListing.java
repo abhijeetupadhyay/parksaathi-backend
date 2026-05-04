@@ -27,7 +27,7 @@ public class ParkingListing {
     @Column(name = "owner_id")
     private Long ownerId;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "address_id")
     private Address address;
     
@@ -53,7 +53,7 @@ public class ParkingListing {
     private LocalDate adEndDate;
     
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", columnDefinition = "listing_status")
+    @Column(name = "status")
     private ListingStatus status = ListingStatus.ACTIVE;
     
     @Column(name = "created_at", insertable = false, updatable = false)
