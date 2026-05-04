@@ -1,4 +1,4 @@
-package com.parkar.parksaathi.service;
+package com.parkar.parksaathi.service.auth;
 
 import com.parkar.parksaathi.dto.request.SignupRequest;
 import com.parkar.parksaathi.dto.response.AuthResponse;
