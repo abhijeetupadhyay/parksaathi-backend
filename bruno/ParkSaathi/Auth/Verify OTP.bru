@@ -1,0 +1,31 @@
+meta {
+  name: Verify OTP
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/auth/v1/verify-otp
+  body: json
+  auth: none
+}
+
+headers {
+  x-parksaathi-device: mobile
+  x-parksaathi-correlation-id: {{correlationId}}
+  x-parksaathi-version: 1.0.0
+}
+
+body:json {
+  {
+    "phone": "1234567892",
+    "otp": "568087"
+  }
+}
+
+script:post-response {
+  if (res.status === 200) {
+    bru.setVar("accessToken", res.body.accessToken);
+    bru.setVar("refreshToken", res.body.refreshToken);
+  }
+}

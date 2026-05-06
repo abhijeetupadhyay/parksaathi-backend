@@ -1,0 +1,23 @@
+meta {
+  name: Send OTP
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/auth/v1/send-otp
+  body: json
+  auth: none
+}
+
+headers {
+  x-parksaathi-device: mobile
+  x-parksaathi-correlation-id: {{correlationId}}
+  x-parksaathi-version: 1.0.0
+}
+
+body:json {
+  {
+    "phone": "1234567890"
+  }
+}

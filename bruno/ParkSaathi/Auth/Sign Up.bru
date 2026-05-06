@@ -1,0 +1,30 @@
+meta {
+  name: Sign Up
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/auth/v1/signup
+  body: json
+  auth: bearer
+}
+
+headers {
+  x-parksaathi-device: mobile
+  x-parksaathi-correlation-id: {{correlationId}}
+  x-parksaathi-version: 1.0.0
+  x-parksaathi-authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJwaG9uZSI6IjEyMzQ1Njc4OTAiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzc3NjE2NTU0LCJleHAiOjE3Nzc2MTc0NTR9.meWrJIavEoAMWqBLiAmGLoOXd-5iqTIB0JFBcuiqT8_0NzuBoBJYzOSNaPWCsd9JWhlznW-KKt2XqtpnY_pTbg
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "aadhar": "123456789012"
+  }
+}
