@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+import static com.parkar.parksaathi.constant.Constants.REFRESH_TOKEN_REVOKED;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -61,9 +63,6 @@ public class AuthService {
         RefreshToken storedToken = refreshTokenService.findByToken(refreshTokenStr)
                 .orElseThrow(() -> new TokenRefreshException(refreshTokenStr, "Refresh token not found in storage"));
 
-        // Verify the token is valid (not expired, not revoked)
-        refreshTokenService.verifyRefreshToken(storedToken);
-
         // Rotate: revoke old, create new
         RefreshToken newRefreshToken = refreshTokenService.rotateRefreshToken(storedToken);
 
@@ -82,9 +81,13 @@ public class AuthService {
                 .build();
     }
 
-    public void signOut(String refreshTokenStr) {
-        refreshTokenService.revokeRefreshToken(refreshTokenStr);
-        log.info("User signed out successfully");
+    public String signOut(String refreshTokenStr) {
+        String revokeMessage = refreshTokenService.revokeRefreshToken(refreshTokenStr);
+        if (revokeMessage.equalsIgnoreCase(REFRESH_TOKEN_REVOKED)) {
+            log.info("User signed out successfully");
+            return "USER_SIGNED_OUT";
+        }
+        return revokeMessage;
     }
 
     public void signup(SignupRequest request, Users currentUser) {

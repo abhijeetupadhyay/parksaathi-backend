@@ -28,4 +28,7 @@ public final class Constants {
     public static final String X_PARKSAATHI_VERSION = "x-parksaathi-version";
     public static final String X_PARKSAATHI_AUTHORIZATION = "x-parksaathi-authorization";
 
+    public static final String REFRESH_TOKEN_PREFIX = "rfrsh_tkn:";
+    public static final String INVALID_REFRESH_TOKEN = "INVALID_REFRESH_TOKEN";
+    public static final String REFRESH_TOKEN_REVOKED = "REFRESH_TOKEN_REVOKED";
 }

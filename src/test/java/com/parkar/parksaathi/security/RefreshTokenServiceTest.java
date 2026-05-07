@@ -1,6 +1,5 @@
 package com.parkar.parksaathi.security;
 
-import com.parkar.parksaathi.exception.customexceptions.TokenRefreshException;
 import com.parkar.parksaathi.model.RefreshToken;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -75,33 +74,6 @@ class RefreshTokenServiceTest {
         Optional<RefreshToken> result = refreshTokenService.findByToken(token);
 
         assertTrue(result.isEmpty());
-    }
-
-    @Test
-    void testVerifyRefreshToken_Success() {
-        RefreshToken token = new RefreshToken();
-        token.setToken("some-token");
-
-        when(redisTemplate.hasKey(REFRESH_TOKEN_PREFIX + "some-token")).thenReturn(true);
-
-        RefreshToken result = refreshTokenService.verifyRefreshToken(token);
-
-        assertEquals(token, result);
-    }
-
-    @Test
-    void testVerifyRefreshToken_NotFound() {
-        RefreshToken token = new RefreshToken();
-        token.setToken("invalid-token");
-
-        when(redisTemplate.hasKey(REFRESH_TOKEN_PREFIX + "invalid-token")).thenReturn(false);
-
-        assertThrows(TokenRefreshException.class, () -> refreshTokenService.verifyRefreshToken(token));
-    }
-
-    @Test
-    void testVerifyRefreshToken_NullToken() {
-        assertThrows(TokenRefreshException.class, () -> refreshTokenService.verifyRefreshToken(null));
     }
 
     @Test

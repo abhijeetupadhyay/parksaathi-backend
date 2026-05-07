@@ -93,7 +93,7 @@ class AuthServiceTest {
         newUser.setId(2L);
         newUser.setPhone("0987654321");
         newUser.setStatus(UserStatus.PENDING);
-        
+
         when(userRepository.save(any(Users.class))).thenReturn(newUser);
         when(jwtService.generateAccessToken(newUser)).thenReturn("new-access-token");
         when(refreshTokenService.createRefreshToken(newUser.getId())).thenReturn(testRefreshToken);
@@ -110,12 +110,12 @@ class AuthServiceTest {
     @Test
     void testRefreshToken_Success() {
         when(refreshTokenService.findByToken("sample-refresh-token")).thenReturn(Optional.of(testRefreshToken));
-        
+
         RefreshToken newRT = new RefreshToken();
         newRT.setToken("new-refresh-token");
         newRT.setUserId(1L);
         when(refreshTokenService.rotateRefreshToken(testRefreshToken)).thenReturn(newRT);
-        
+
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(jwtService.generateAccessToken(testUser)).thenReturn("new-access-token");
         when(jwtService.getAccessTokenExpiration()).thenReturn(3600000L);
@@ -129,7 +129,7 @@ class AuthServiceTest {
 
     @Test
     void testSignOut() {
-        doNothing().when(refreshTokenService).revokeRefreshToken("sample-refresh-token");
+        doReturn("USER_SIGNED_OUT").when(refreshTokenService).revokeRefreshToken("sample-refresh-token");
         authService.signOut("sample-refresh-token");
         verify(refreshTokenService, times(1)).revokeRefreshToken("sample-refresh-token");
     }

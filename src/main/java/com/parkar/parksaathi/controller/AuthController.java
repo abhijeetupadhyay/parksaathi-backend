@@ -58,8 +58,8 @@ public class AuthController {
 
     @PostMapping(VERSION1 + SIGNOUT_ENDPOINT)
     public ResponseEntity<?> signOut(@Valid @RequestBody RefreshTokenRequest request) {
-        authService.signOut(request.getRefreshToken());
-        APIResponse apiResponse = APIResponse.builder().message("Signed Out").build();
+        String signOutMessage = authService.signOut(request.getRefreshToken());
+        APIResponse apiResponse = APIResponse.builder().message(signOutMessage).build();
         return ResponseEntity.ok(apiResponse);
     }
 
