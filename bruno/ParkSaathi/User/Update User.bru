@@ -1,0 +1,30 @@
+meta {
+  name: Update User
+  type: http
+  seq: 1
+}
+
+put {
+  url: {{baseUrl}}/user/v1/update
+  body: json
+  auth: bearer
+}
+
+headers {
+  x-parksaathi-device: mobile
+  x-parksaathi-correlation-id: {{correlationId}}
+  x-parksaathi-version: 1.0.0
+  x-parksaathi-authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJwaG9uZSI6IjEyMzQ1Njc4OTAiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzc4MTc0MDM3LCJleHAiOjE3NzgxNzQ5Mzd9.CMVBLMxqGoKKKzEqvbqt-wV-sSU8xQlrRlYjULnHWHuaHXHCDGrzYHTDoKERfwj9FHFDH5g090XcxsJyanYzxw
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "name": "John Doe1",
+    "email": "john.doe1@example.com",
+    "aadhaar": "1234567890121"
+  }
+}
