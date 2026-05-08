@@ -12,6 +12,7 @@ public final class Constants {
     public static final String SIGNOUT_ENDPOINT = "/signout";
     public static final String SIGNUP_ENDPOINT = "/signup";
     public static final String CREATE_PARKING_ENDPOINT = "/spots/new";
+    public static final String NEARBY_PARKING_ENDPOINT = "/nearby";
 
     public static final String HEADER_DEVICE = "x-parksaathi-device";
     public static final String HEADER_CORRELATION_ID = "x-parksaathi-correlation-id";

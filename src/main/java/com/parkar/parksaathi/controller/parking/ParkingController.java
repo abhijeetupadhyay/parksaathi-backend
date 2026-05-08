@@ -1,6 +1,7 @@
 package com.parkar.parksaathi.controller.parking;
 
 import com.parkar.parksaathi.dto.request.AddParkingRequest;
+import com.parkar.parksaathi.dto.request.CreateParkingResponse;
 import com.parkar.parksaathi.dto.response.ParkingSpotDetailResponse;
 import com.parkar.parksaathi.security.JwtService;
 import com.parkar.parksaathi.service.parking.ParkingService;
@@ -10,9 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static com.parkar.parksaathi.constant.Constants.*;
 
@@ -25,16 +24,16 @@ public class ParkingController {
     private final JwtService jwtService;
 
     @PostMapping(VERSION1 + CREATE_PARKING_ENDPOINT)
-    public ResponseEntity<Map<String, Long>> createSpot(
-          //  @RequestHeader("x-parksaathi-accessToken") String token,
+    public ResponseEntity<CreateParkingResponse> createSpot(
+            @RequestHeader("x-parksaathi-accessToken") String token,
             @RequestBody AddParkingRequest request) {
         try {
-            Long userId = 2L;//jwtService.extractUserId(token);
+            Long userId = jwtService.extractUserId(token);
             Long spotId = parkingService.addNewParking(request, userId);
-            return ResponseEntity.ok(Collections.singletonMap("spotId", spotId));
+            return ResponseEntity.ok(CreateParkingResponse.success(spotId));
         } catch (JwtException | IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Collections.emptyMap());
+                    .body(null);
         }
     }
 
@@ -54,11 +53,11 @@ public class ParkingController {
         }
     }
 
-    @GetMapping(VERSION1 + "/nearby")
+    @GetMapping(VERSION1 + NEARBY_PARKING_ENDPOINT)
     public ResponseEntity<List<ParkingSpotDetailResponse>> getNearbyParkingSpots(
             @RequestParam Double latitude,
             @RequestParam Double longitude,
-            @RequestParam(defaultValue = "5.0") Double radiusKm,
+            @RequestParam(defaultValue = "3.0") Double radiusKm,
             @RequestHeader("x-parksaathi-device") String device,
             @RequestHeader("x-parksaathi-correlation-id") String correlationId,
             @RequestHeader("x-parksaathi-version") String version) {
