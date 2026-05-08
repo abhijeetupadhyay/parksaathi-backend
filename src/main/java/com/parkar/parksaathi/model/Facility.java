@@ -23,5 +23,5 @@ public class Facility {
     private String facilityName;
     
     @ManyToMany(mappedBy = "facilities")
-    private Set<ParkingListing> parkingListings = new HashSet<>();
+    private Set<ParkingListing> parkingListings;
 }

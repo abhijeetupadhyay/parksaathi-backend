@@ -15,11 +15,4 @@ public class CreateParkingResponse {
     private String message;
     private LocalDateTime createdAt;
     
-    public static CreateParkingResponse success(Long spotId) {
-        return CreateParkingResponse.builder()
-                .spotId(spotId)
-                .message("Parking spot created successfully")
-                .createdAt(LocalDateTime.now())
-                .build();
-    }
 }

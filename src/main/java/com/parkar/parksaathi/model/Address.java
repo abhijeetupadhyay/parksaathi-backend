@@ -46,5 +46,5 @@ public class Address {
     private LocalDateTime updatedAt;
     
     @OneToMany(mappedBy = "address")
-    private Set<ParkingListing> parkingListings = new HashSet<>();
+    private Set<ParkingListing> parkingListings;
 }

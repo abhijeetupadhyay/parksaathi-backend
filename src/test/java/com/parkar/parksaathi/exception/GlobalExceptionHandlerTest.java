@@ -1,10 +1,7 @@
 package com.parkar.parksaathi.exception;
 
 import com.parkar.parksaathi.dto.response.ApiErrorResponse;
-import com.parkar.parksaathi.exception.customexceptions.AppException;
-import com.parkar.parksaathi.exception.customexceptions.ResourceNotFoundException;
-import com.parkar.parksaathi.exception.customexceptions.TokenRefreshException;
-import com.parkar.parksaathi.exception.customexceptions.UnauthorizedException;
+import com.parkar.parksaathi.exception.customexceptions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -101,5 +98,15 @@ class GlobalExceptionHandlerTest {
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals("An unexpected error occurred", response.getBody().getMessage());
+    }
+
+    @Test
+    void testHandleInvalidLocationParameters() {
+        InvalidLocationParametersException ex = new InvalidLocationParametersException("Invalid Location Parameters");
+        ResponseEntity<ApiErrorResponse> response = handler.handleInvalidLocationParameters(ex);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Invalid Location Parameters", response.getBody().getMessage());
+
     }
 }

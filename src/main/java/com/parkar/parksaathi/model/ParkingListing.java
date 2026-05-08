@@ -69,7 +69,7 @@ public class ParkingListing {
     )
     @Column(name = "day_of_week")
     @Enumerated(EnumType.STRING)
-    private Set<DayOfWeekEnum> availabilityDays = new HashSet<>();
+    private Set<DayOfWeekEnum> availabilityDays;
     
     @ManyToMany
     @JoinTable(
@@ -77,11 +77,9 @@ public class ParkingListing {
         joinColumns = @JoinColumn(name = "parking_id"),
         inverseJoinColumns = @JoinColumn(name = "facility_id")
     )
-    private Set<Facility> facilities = new HashSet<>();
+    private Set<Facility> facilities;
     
     @OneToMany(mappedBy = "parking", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ParkingVehicleConfig> vehicleConfigs = new HashSet<>();
+    private Set<ParkingVehicleConfig> vehicleConfigs;
     
-    //@OneToMany(mappedBy = "parking", cascade = CascadeType.ALL, orphanRemoval = true)
-    //private Set<ParkingImage> images = new HashSet<>();
 }

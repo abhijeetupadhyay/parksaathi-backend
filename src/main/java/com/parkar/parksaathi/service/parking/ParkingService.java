@@ -1,7 +1,10 @@
 package com.parkar.parksaathi.service.parking;
 
 import com.parkar.parksaathi.dto.request.AddParkingRequest;
-import com.parkar.parksaathi.dto.response.ParkingSpotDetailResponse;
+import com.parkar.parksaathi.dto.request.CreateParkingResponse;
+import com.parkar.parksaathi.dto.response.*;
+import com.parkar.parksaathi.exception.customexceptions.InvalidLocationParametersException;
+import com.parkar.parksaathi.exception.customexceptions.ResourceNotFoundException;
 import com.parkar.parksaathi.model.*;
 import com.parkar.parksaathi.repository.FacilityRepository;
 import com.parkar.parksaathi.repository.ParkingListingRepository;
@@ -10,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,7 +26,7 @@ public class ParkingService {
 
     private final FacilityRepository facilityRepo;
 
-    public Long addNewParking(AddParkingRequest req, Long currentUserId) {
+    public CreateParkingResponse addNewParking(AddParkingRequest req, Long currentUserId) {
         ParkingListing listing = new ParkingListing();
         listing.setOwnerId(currentUserId);
         listing.setDescription(req.getDescription());
@@ -65,14 +69,20 @@ public class ParkingService {
             return config;
         }).collect(Collectors.toSet()));
 
-        return parkingRepo.save(listing).getId();
+        Long spotId =  parkingRepo.save(listing).getId();
+        CreateParkingResponse response = CreateParkingResponse.builder()
+                .spotId(spotId)
+                .message("Parking spot created successfully")
+                .createdAt(LocalDateTime.now())
+                .build();
+        return response;
     }
 
     public ParkingSpotDetailResponse getSpotDetail(Long spotId) {
         ParkingListing parkingSpot = parkingRepo.findById(spotId)
-                .orElseThrow(() -> new IllegalArgumentException("Parking spot not found with id: " + spotId));
+                    .orElseThrow(() -> new ResourceNotFoundException("Parking spot not found with id: " + spotId));
 
-        // Get pricing from parking_vehicle_configs
+            // Get pricing from parking_vehicle_configs
         Set<ParkingVehicleConfig> vehicleConfigs = parkingSpot.getVehicleConfigs();
 
         // Calculate average pricing across all vehicle types
@@ -105,7 +115,7 @@ public class ParkingService {
                         .build());*/
 
         return ParkingSpotDetailResponse.builder()
-                .spot(ParkingSpotDetailResponse.SpotInfo.builder()
+                .spot(SpotInfo.builder()
                         .spotId(String.valueOf(parkingSpot.getId()))
                         .spotName(parkingSpot.getDescription()) // Using description as name
                         .spotAddress(parkingSpot.getAddress().getAddressLine1() + ", " +
@@ -115,17 +125,17 @@ public class ParkingService {
                                 .map(Facility::getFacilityName)
                                 .collect(Collectors.toList()))
                         .build())
-                .pricing(ParkingSpotDetailResponse.PricingInfo.builder()
+                .pricing(PricingInfo.builder()
                         .hourly(avgHourly)
                         .daily(avgDaily)
                         .weekly(avgWeekly)
                         .monthly(avgMonthly)
                         .build())
-                /*.rating(ParkingSpotDetailResponse.RatingInfo.builder()
+               /* .rating(RatingInfo.builder()
                         .rating(ratingAggregate.getAverageRating())
                         .ratingCount(ratingAggregate.getTotalRatings())
                         .build())*/
-                .availability(ParkingSpotDetailResponse.AvailabilityInfo.builder()
+                .availability(AvailabilityInfo.builder()
                         .weekly(!parkingSpot.getAvailabilityDays().isEmpty())
                         .open24x7(parkingSpot.getIsOpen24Hours())
                         .build())
@@ -134,9 +144,8 @@ public class ParkingService {
 
 
     public List<ParkingSpotDetailResponse> getNearbyParkingSpots(Double latitude, Double longitude, Double radiusKm) {
-        // Validate input parameters
         if (latitude == null || longitude == null || radiusKm == null || radiusKm <= 0) {
-            throw new IllegalArgumentException("Invalid location parameters");
+            throw new InvalidLocationParametersException("Invalid location parameters: latitude, longitude and radiusKm must be provided");
         }
 
         // Find all parking listings within the radius
@@ -177,7 +186,7 @@ public class ParkingService {
 
         // Build response
         return ParkingSpotDetailResponse.builder()
-                .spot(ParkingSpotDetailResponse.SpotInfo.builder()
+                .spot(SpotInfo.builder()
                         .spotId(String.valueOf(parkingSpot.getId()))
                         .spotName(parkingSpot.getDescription())
                         .spotAddress(parkingSpot.getAddress().getAddressLine1() + ", " +
@@ -187,22 +196,21 @@ public class ParkingService {
                                 .map(Facility::getFacilityName)
                                 .collect(Collectors.toList()))
                         .build())
-                .pricing(ParkingSpotDetailResponse.PricingInfo.builder()
+                .pricing(PricingInfo.builder()
                         .hourly(avgHourly)
                         .daily(avgDaily)
                         .weekly(avgWeekly)
                         .monthly(avgMonthly)
                         .build())
-                .rating(ParkingSpotDetailResponse.RatingInfo.builder()
+                .rating(RatingInfo.builder()
                         .rating(4.5) // Default rating for now
                         .ratingCount(0)
                         .build())
-                .availability(ParkingSpotDetailResponse.AvailabilityInfo.builder()
+                .availability(AvailabilityInfo.builder()
                         .weekly(!parkingSpot.getAvailabilityDays().isEmpty())
                         .open24x7(parkingSpot.getIsOpen24Hours())
                         .build())
                 .build();
     }
-
 
 }

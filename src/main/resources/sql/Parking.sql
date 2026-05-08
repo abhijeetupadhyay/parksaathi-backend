@@ -1,3 +1,11 @@
+CREATE TABLE vehicle_types (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    type_name VARCHAR(50) UNIQUE NOT NULL
+); 
+
+insert into Vehicle_types (type_name) values ('TWO_WHEELER'), ('FOUR_WHEELER');
+
+
 CREATE TABLE address (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
@@ -102,13 +110,6 @@ CREATE TABLE parking_vehicle_configs (
         REFERENCES vehicle_types(id)
 );
 
-CREATE TABLE parking_images (
-    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    parking_id BIGINT NOT NULL,
-    image_url VARCHAR(500) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_pi_parking FOREIGN KEY (parking_id) REFERENCES parking_listings(id)
-);
 
 
 

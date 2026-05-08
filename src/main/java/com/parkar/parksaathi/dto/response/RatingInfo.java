@@ -9,9 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ParkingSpotDetailResponse {
-    private SpotInfo spot;
-    private PricingInfo pricing;
-    private RatingInfo rating;
-    private AvailabilityInfo availability;
+public class RatingInfo {
+    private Double rating;
+    private Integer ratingCount;
 }
