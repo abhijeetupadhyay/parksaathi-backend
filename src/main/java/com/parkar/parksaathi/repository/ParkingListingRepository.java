@@ -13,18 +13,6 @@ import java.util.List;
 @Repository
 public interface ParkingListingRepository extends JpaRepository<ParkingListing, Long> {
     
-    List<ParkingListing> findByStatus(ListingStatus status);
-    
-    List<ParkingListing> findByOwnerId(Long ownerId);
-    
-    @Query("SELECT p FROM ParkingListing p WHERE p.adStartDate <= :date AND p.adEndDate >= :date")
-    List<ParkingListing> findActiveListingsForDate(@Param("date") LocalDate date);
-    
-    @Query("SELECT p FROM ParkingListing p JOIN p.address a WHERE a.city = :city AND p.status = :status")
-    List<ParkingListing> findByCityAndStatus(@Param("city") String city, @Param("status") ListingStatus status);
-    
-    List<ParkingListing> findByIsOpen24HoursTrue();
-
     @Query(value = "SELECT p.* FROM parking_listings p " +
             "JOIN address a ON p.address_id = a.id " +
             "WHERE (6371 * acos(cos(radians(:latitude)) * cos(radians(a.latitude)) * " +
