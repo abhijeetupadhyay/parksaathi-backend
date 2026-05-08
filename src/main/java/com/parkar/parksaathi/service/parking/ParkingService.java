@@ -133,11 +133,76 @@ public class ParkingService {
     }
 
 
-    private List<String> parseAmenities(String amenities) {
-        if (amenities == null || amenities.isEmpty()) {
-            return Collections.emptyList();
+    public List<ParkingSpotDetailResponse> getNearbyParkingSpots(Double latitude, Double longitude, Double radiusKm) {
+        // Validate input parameters
+        if (latitude == null || longitude == null || radiusKm == null || radiusKm <= 0) {
+            throw new IllegalArgumentException("Invalid location parameters");
         }
-        return Arrays.asList(amenities.split(","));
+
+        // Find all parking listings within the radius
+        List<ParkingListing> nearbyListings = parkingRepo.findNearbyParkingSpots(
+                latitude, longitude, radiusKm);
+
+        // Convert to response DTOs
+        return nearbyListings.stream()
+                .map(this::convertToDetailResponse)
+                .collect(Collectors.toList());
     }
+
+    private ParkingSpotDetailResponse convertToDetailResponse(ParkingListing parkingSpot) {
+        // Get pricing from parking_vehicle_configs
+        Set<ParkingVehicleConfig> vehicleConfigs = parkingSpot.getVehicleConfigs();
+
+        // Calculate average pricing across all vehicle types
+        double avgHourly = vehicleConfigs.stream()
+                .map(ParkingVehicleConfig::getHourlyRate)
+                .filter(Objects::nonNull)
+                .mapToDouble(BigDecimal::doubleValue)
+                .average().orElse(0.0);
+        double avgDaily = vehicleConfigs.stream()
+                .map(ParkingVehicleConfig::getDailyRate)
+                .filter(Objects::nonNull)
+                .mapToDouble(BigDecimal::doubleValue)
+                .average().orElse(0.0);
+        double avgWeekly = vehicleConfigs.stream()
+                .map(ParkingVehicleConfig::getWeeklyRate)
+                .filter(Objects::nonNull)
+                .mapToDouble(BigDecimal::doubleValue)
+                .average().orElse(0.0);
+        double avgMonthly = vehicleConfigs.stream()
+                .map(ParkingVehicleConfig::getMonthlyRate)
+                .filter(Objects::nonNull)
+                .mapToDouble(BigDecimal::doubleValue)
+                .average().orElse(0.0);
+
+        // Build response
+        return ParkingSpotDetailResponse.builder()
+                .spot(ParkingSpotDetailResponse.SpotInfo.builder()
+                        .spotId(String.valueOf(parkingSpot.getId()))
+                        .spotName(parkingSpot.getDescription())
+                        .spotAddress(parkingSpot.getAddress().getAddressLine1() + ", " +
+                                parkingSpot.getAddress().getCity())
+                        .aboutSpot(parkingSpot.getDescription())
+                        .amenities(parkingSpot.getFacilities().stream()
+                                .map(Facility::getFacilityName)
+                                .collect(Collectors.toList()))
+                        .build())
+                .pricing(ParkingSpotDetailResponse.PricingInfo.builder()
+                        .hourly(avgHourly)
+                        .daily(avgDaily)
+                        .weekly(avgWeekly)
+                        .monthly(avgMonthly)
+                        .build())
+                .rating(ParkingSpotDetailResponse.RatingInfo.builder()
+                        .rating(4.5) // Default rating for now
+                        .ratingCount(0)
+                        .build())
+                .availability(ParkingSpotDetailResponse.AvailabilityInfo.builder()
+                        .weekly(!parkingSpot.getAvailabilityDays().isEmpty())
+                        .open24x7(parkingSpot.getIsOpen24Hours())
+                        .build())
+                .build();
+    }
+
 
 }

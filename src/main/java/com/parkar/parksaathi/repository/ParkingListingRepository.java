@@ -24,4 +24,19 @@ public interface ParkingListingRepository extends JpaRepository<ParkingListing, 
     List<ParkingListing> findByCityAndStatus(@Param("city") String city, @Param("status") ListingStatus status);
     
     List<ParkingListing> findByIsOpen24HoursTrue();
+
+    @Query(value = "SELECT p.* FROM parking_listings p " +
+            "JOIN address a ON p.address_id = a.id " +
+            "WHERE (6371 * acos(cos(radians(:latitude)) * cos(radians(a.latitude)) * " +
+            "cos(radians(a.longitude) - radians(:longitude)) + " +
+            "sin(radians(:latitude)) * sin(radians(a.latitude)))) <= :radiusKm " +
+            "ORDER BY (6371 * acos(cos(radians(:latitude)) * cos(radians(a.latitude)) * " +
+            "cos(radians(a.longitude) - radians(:longitude)) + " +
+            "sin(radians(:latitude)) * sin(radians(a.latitude))))",
+            nativeQuery = true)
+    List<ParkingListing> findNearbyParkingSpots(@Param("latitude") Double latitude,
+                                                @Param("longitude") Double longitude,
+                                                @Param("radiusKm") Double radiusKm);
+
+
 }

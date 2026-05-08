@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static com.parkar.parksaathi.constant.Constants.*;
@@ -48,6 +49,25 @@ public class ParkingController {
             return ResponseEntity.ok(detailResponse);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping(VERSION1 + "/nearby")
+    public ResponseEntity<List<ParkingSpotDetailResponse>> getNearbyParkingSpots(
+            @RequestParam Double latitude,
+            @RequestParam Double longitude,
+            @RequestParam(defaultValue = "5.0") Double radiusKm,
+            @RequestHeader("x-parksaathi-device") String device,
+            @RequestHeader("x-parksaathi-correlation-id") String correlationId,
+            @RequestHeader("x-parksaathi-version") String version) {
+        try {
+            List<ParkingSpotDetailResponse> nearbySpots = parkingService.getNearbyParkingSpots(
+                    latitude, longitude, radiusKm);
+            return ResponseEntity.ok(nearbySpots);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
