@@ -138,13 +138,13 @@ class AuthControllerTest {
         RefreshTokenRequest request = new RefreshTokenRequest();
         request.setRefreshToken("refresh");
 
-        doNothing().when(authService).signOut("refresh");
+        doReturn("USER_SIGNED_OUT").when(authService).signOut("refresh");
 
         mockMvc.perform(post(AUTH + VERSION1 + SIGNOUT_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("Signed Out"));
+                .andExpect(jsonPath("$.message").value("USER_SIGNED_OUT"));
     }
 
     @Test
