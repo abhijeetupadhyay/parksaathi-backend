@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface ParkingRepository extends JpaRepository<Parking, Long> {
 
-    @Query(value = "SELECT p.* FROM parking_listings p " +
+    @Query(value = "SELECT p.* FROM parking p " +
             "JOIN address a ON p.address_id = a.id " +
             "WHERE (6371 * acos(cos(radians(:latitude)) * cos(radians(a.latitude)) * " +
             "cos(radians(a.longitude) - radians(:longitude)) + " +
