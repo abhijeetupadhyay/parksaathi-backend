@@ -46,7 +46,9 @@ public class AuthController {
 
     @PostMapping(VERSION1 + VERIFY_OTP_ENDPOINT)
     public ResponseEntity<?> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
-        otpService.verifyOtp(request.getPhone(), request.getOtp());
+        if (!request.getOtp().equalsIgnoreCase("000000")) { //todo: added static OTP for testing
+            otpService.verifyOtp(request.getPhone(), request.getOtp());
+        }
         AuthResponse response = authService.signIn(request.getPhone());
         return ResponseEntity.ok(response);
     }
