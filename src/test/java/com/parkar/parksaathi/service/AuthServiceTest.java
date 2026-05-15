@@ -8,6 +8,7 @@ import com.parkar.parksaathi.model.Users;
 import com.parkar.parksaathi.repository.UserRepository;
 import com.parkar.parksaathi.security.JwtService;
 import com.parkar.parksaathi.security.RefreshTokenService;
+import com.parkar.parksaathi.service.auth.AuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

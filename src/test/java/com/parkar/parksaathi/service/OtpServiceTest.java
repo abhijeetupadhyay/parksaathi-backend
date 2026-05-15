@@ -1,5 +1,6 @@
 package com.parkar.parksaathi.service;
 
+import com.parkar.parksaathi.service.auth.OtpService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,4 +1,4 @@
-package com.parkar.parksaathi.controller;
+package com.parkar.parksaathi.controller.auth;
 
 import com.parkar.parksaathi.dto.request.RefreshTokenRequest;
 import com.parkar.parksaathi.dto.request.SendOtpRequest;
@@ -7,8 +7,9 @@ import com.parkar.parksaathi.dto.request.VerifyOtpRequest;
 import com.parkar.parksaathi.dto.response.APIResponse;
 import com.parkar.parksaathi.dto.response.AuthResponse;
 import com.parkar.parksaathi.dto.response.SendOtpResponse;
-import com.parkar.parksaathi.service.AuthService;
-import com.parkar.parksaathi.service.OtpService;
+import com.parkar.parksaathi.enums.UserStatus;
+import com.parkar.parksaathi.service.auth.AuthService;
+import com.parkar.parksaathi.service.auth.OtpService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
