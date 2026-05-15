@@ -11,10 +11,10 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SpotInfo {
-    private String spotId;
-    private String spotName;
-    private String spotAddress;
-    private String aboutSpot;
+public class ParkingInfo {
+    private String parkingId;
+    private String parkingName;
+    private String parkingAddress;
+    private String aboutParking;
     private List<String> amenities;
 }

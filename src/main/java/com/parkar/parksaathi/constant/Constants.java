@@ -11,7 +11,7 @@ public final class Constants {
     public static final String REFRESH_ENDPOINT = "/refresh";
     public static final String SIGNOUT_ENDPOINT = "/signout";
     public static final String SIGNUP_ENDPOINT = "/signup";
-    public static final String CREATE_PARKING_ENDPOINT = "/spots/new";
+    public static final String CREATE_PARKING_ENDPOINT = "/new";
     public static final String NEARBY_PARKING_ENDPOINT = "/nearby";
 
     public static final String HEADER_DEVICE = "x-parksaathi-device";
