@@ -3,6 +3,7 @@ package com.parkar.parksaathi.service.parking;
 import com.parkar.parksaathi.dto.request.*;
 import com.parkar.parksaathi.dto.response.*;
 import com.parkar.parksaathi.enums.ListingStatus;
+import com.parkar.parksaathi.exception.customexceptions.DuplicateParkingException;
 import com.parkar.parksaathi.exception.customexceptions.InvalidLocationParametersException;
 import com.parkar.parksaathi.exception.customexceptions.ResourceNotFoundException;
 import com.parkar.parksaathi.model.*;
@@ -39,6 +40,11 @@ public class ParkingService {
      * @return
      */
     public CreateParkingResponse addNewParking(AddParkingRequest req, Users currentUser) {
+        Address address = getAddress(req);
+        List<Parking> parkingList = parkingRepository.findParkingByOwnerAndAddress(currentUser, address);
+        if (!parkingList.isEmpty()) {
+            throw new DuplicateParkingException("Parking already exists for current user and address");
+        }
         Parking listing = new Parking();
         listing.setOwner(currentUser);
         listing.setName(req.getName());
@@ -55,7 +61,7 @@ public class ParkingService {
         listing.setAvailabilityDays(new HashSet<>(req.getAvailability().getDays()));
         listing.setAmenities(getAmenities(req));
         // Map Address
-        listing.setAddress(getAddress(req));
+        listing.setAddress(address);
         Parking parking;
         try {
             parking = parkingRepository.save(listing);

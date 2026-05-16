@@ -3,6 +3,8 @@ package com.parkar.parksaathi.controller.parking;
 import com.parkar.parksaathi.dto.request.AddParkingRequest;
 import com.parkar.parksaathi.dto.request.CreateParkingResponse;
 import com.parkar.parksaathi.dto.response.ParkingDetailsResponse;
+import com.parkar.parksaathi.enums.UserStatus;
+import com.parkar.parksaathi.exception.customexceptions.BadInputException;
 import com.parkar.parksaathi.model.Users;
 import com.parkar.parksaathi.security.JwtService;
 import com.parkar.parksaathi.service.parking.ParkingService;
@@ -30,6 +32,9 @@ public class ParkingController {
     public ResponseEntity<CreateParkingResponse> createParking(
             @RequestBody AddParkingRequest request,
             @AuthenticationPrincipal Users currentUser) {
+        if (!currentUser.getStatus().equals(UserStatus.ACTIVE)) {
+            throw new BadInputException("User is not active for creating new parking");
+        }
         CreateParkingResponse response = parkingService.addNewParking(request, currentUser);
         return ResponseEntity.ok(response);
     }
@@ -37,7 +42,10 @@ public class ParkingController {
 
     @GetMapping(VERSION1 + "/detail/{parkingId}")
     public ResponseEntity<ParkingDetailsResponse> getParkingDetail(
-            @PathVariable Long parkingId) {
+            @PathVariable Long parkingId, @AuthenticationPrincipal Users currentUser) {
+        if (!currentUser.getStatus().equals(UserStatus.ACTIVE)) {
+            throw new BadInputException("User is not active for creating new parking");
+        }
         try {
             ParkingDetailsResponse detailResponse = parkingService.getParkingDetail(parkingId);
             return ResponseEntity.ok(detailResponse);
@@ -54,7 +62,10 @@ public class ParkingController {
     public ResponseEntity<List<ParkingDetailsResponse>> getNearbyParkingSpots(
             @RequestParam Double latitude,
             @RequestParam Double longitude,
-            @RequestParam(defaultValue = "3.0") Double radiusKm) {
+            @RequestParam(defaultValue = "3.0") Double radiusKm, @AuthenticationPrincipal Users currentUser) {
+        if (!currentUser.getStatus().equals(UserStatus.ACTIVE)) {
+            throw new BadInputException("User is not active for creating new parking");
+        }
         try {
             List<ParkingDetailsResponse> nearbySpots = parkingService.getNearbyParkingSpots(
                     latitude, longitude, radiusKm);

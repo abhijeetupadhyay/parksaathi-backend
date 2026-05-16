@@ -1,6 +1,8 @@
 package com.parkar.parksaathi.repository;
 
+import com.parkar.parksaathi.model.Address;
 import com.parkar.parksaathi.model.Parking;
+import com.parkar.parksaathi.model.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,5 +26,5 @@ public interface ParkingRepository extends JpaRepository<Parking, Long> {
                                          @Param("longitude") Double longitude,
                                          @Param("radiusKm") Double radiusKm);
 
-
+    List<Parking> findParkingByOwnerAndAddress(Users owner, Address address);
 }
