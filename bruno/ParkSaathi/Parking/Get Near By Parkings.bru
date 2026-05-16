@@ -1,13 +1,20 @@
 meta {
-  name: Sign Up
+  name: Get Near By Parkings
   type: http
-  seq: 3
+  seq: 4
 }
 
-post {
-  url: {{baseUrl}}/auth/v1/signup
-  body: json
-  auth: bearer
+get {
+  url: {{baseUrl}}/parking/v1/nearby?latitude=28.6139&longitude=77.2090&radiusKm=3.0
+  body: none
+  auth: inherit
+}
+
+params:query {
+  latitude: 28.6139
+  longitude: 77.2090
+  radiusKm: 3.0
+  : 
 }
 
 headers {
@@ -17,14 +24,7 @@ headers {
   x-parksaathi-authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJwaG9uZSI6IjEyMzQ1Njc4OTAiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzc4OTA5MjQ2LCJleHAiOjE3Nzg5MTAxNDZ9.HvCeOwgFNjH7MVrBgFG0KAvkPmZ5lLQVzvNI6jVjTFwrt0Fixnq_jWVV7q-1KaG3LpAVpS_ekZ7RCf0OUh_79Q
 }
 
-auth:bearer {
-  token: {{accessToken}}
-}
-
-body:json {
-  {
-    "name": "John Doe",
-    "email": "john.doe@example.com",
-    "aadhar": "123456789012"
-  }
+settings {
+  encodeUrl: true
+  timeout: 0
 }

@@ -1,4 +1,4 @@
-package com.parkar.parksaathi.service;
+package com.parkar.parksaathi.service.auth;
 
 import com.parkar.parksaathi.exception.customexceptions.AppException;
 import lombok.RequiredArgsConstructor;

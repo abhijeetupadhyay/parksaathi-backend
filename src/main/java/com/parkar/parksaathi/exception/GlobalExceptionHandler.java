@@ -1,10 +1,7 @@
 package com.parkar.parksaathi.exception;
 
 import com.parkar.parksaathi.dto.response.ApiErrorResponse;
-import com.parkar.parksaathi.exception.customexceptions.AppException;
-import com.parkar.parksaathi.exception.customexceptions.ResourceNotFoundException;
-import com.parkar.parksaathi.exception.customexceptions.TokenRefreshException;
-import com.parkar.parksaathi.exception.customexceptions.UnauthorizedException;
+import com.parkar.parksaathi.exception.customexceptions.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -89,6 +86,33 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
+    @ExceptionHandler(BadInputException.class)
+    public ResponseEntity<ApiErrorResponse> handleBadInputException(BadInputException e) {
+        String message = e.getMessage();
+
+        log.warn("Validation failed: {}", message);
+
+        ApiErrorResponse error = ApiErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Bad Request")
+                .message(message)
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+    @ExceptionHandler(DuplicateParkingException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicateParkingException(DuplicateParkingException e) {
+        String message = e.getMessage();
+
+        log.warn("Duplicate Parking : {}", message);
+
+        ApiErrorResponse error = ApiErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Bad Request")
+                .message(message)
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleException(Exception e) {
         log.error("Unhandled exception occurred", e);
@@ -99,4 +123,18 @@ public class GlobalExceptionHandler {
                 .build();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
+
+    @ExceptionHandler(InvalidLocationParametersException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidLocationParameters(
+            InvalidLocationParametersException ex) {
+
+        ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Invalid Location Parameters")
+                .message(ex.getMessage())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
 }
