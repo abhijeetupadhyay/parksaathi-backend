@@ -15,4 +15,5 @@ public class ParkingDetailsResponse {
     private PricingAndCapacityInfo pricingAndCapacityInfo;
     private RatingInfo ratingInfo;
     private AvailabilityDto availabilityInfo;
+    private ParkingOwner owner;
 }

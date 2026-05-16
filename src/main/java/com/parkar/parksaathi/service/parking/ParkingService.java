@@ -1,10 +1,7 @@
 package com.parkar.parksaathi.service.parking;
 
 import com.parkar.parksaathi.dto.request.*;
-import com.parkar.parksaathi.dto.response.ParkingDetailsResponse;
-import com.parkar.parksaathi.dto.response.ParkingInfo;
-import com.parkar.parksaathi.dto.response.PricingAndCapacityInfo;
-import com.parkar.parksaathi.dto.response.RatingInfo;
+import com.parkar.parksaathi.dto.response.*;
 import com.parkar.parksaathi.enums.ListingStatus;
 import com.parkar.parksaathi.exception.customexceptions.InvalidLocationParametersException;
 import com.parkar.parksaathi.exception.customexceptions.ResourceNotFoundException;
@@ -191,6 +188,23 @@ public class ParkingService {
                 .availabilityInfo(getAvailabilityInfo(parking))
                 .pricingAndCapacityInfo(getPricingAndCapacityInfo(parking.getVehicleConfigs()))
                 .ratingInfo(getRatings(parking))
+                .owner(getParkingOwnerDetails(parking.getOwner()))
+                .build();
+    }
+
+    /**
+     * This method will return the owner details of parking owner
+     *
+     * @param owner
+     * @return
+     */
+    private ParkingOwner getParkingOwnerDetails(Users owner) {
+        return ParkingOwner.builder()
+                .name(owner.getName())
+                .phone(owner.getPhone())
+                .email(owner.getEmail())
+                .aadhar(owner.getAadhaar())
+                .status(String.valueOf(owner.getStatus()))
                 .build();
     }
 
