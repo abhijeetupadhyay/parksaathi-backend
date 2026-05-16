@@ -99,6 +99,19 @@ public class GlobalExceptionHandler {
                 .build();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
+    @ExceptionHandler(DuplicateParkingException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicateParkingException(DuplicateParkingException e) {
+        String message = e.getMessage();
+
+        log.warn("Duplicate Parking : {}", message);
+
+        ApiErrorResponse error = ApiErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Bad Request")
+                .message(message)
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleException(Exception e) {
