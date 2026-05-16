@@ -41,8 +41,8 @@ public class ParkingService {
      */
     public CreateParkingResponse addNewParking(AddParkingRequest req, Users currentUser) {
         Address address = getAddress(req);
-        Optional<Parking> parkingOptional = parkingRepository.findParkingByOwnerAndAddress(currentUser, address);
-        if (parkingOptional.isPresent()) {
+        List<Parking> parkingList = parkingRepository.findParkingByOwnerAndAddress(currentUser, address);
+        if (!parkingList.isEmpty()) {
             throw new DuplicateParkingException("Parking already exists for current user and address");
         }
         Parking listing = new Parking();

@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface ParkingRepository extends JpaRepository<Parking, Long> {
@@ -27,5 +26,5 @@ public interface ParkingRepository extends JpaRepository<Parking, Long> {
                                          @Param("longitude") Double longitude,
                                          @Param("radiusKm") Double radiusKm);
 
-    Optional<Parking> findParkingByOwnerAndAddress(Users owner, Address address);
+    List<Parking> findParkingByOwnerAndAddress(Users owner, Address address);
 }
