@@ -2,7 +2,7 @@ package com.parkar.parksaathi.controller.parking;
 
 import com.parkar.parksaathi.dto.request.AddParkingRequest;
 import com.parkar.parksaathi.dto.request.CreateParkingResponse;
-import com.parkar.parksaathi.dto.response.ParkingSpotDetailResponse;
+import com.parkar.parksaathi.dto.response.ParkingDetailsResponse;
 import com.parkar.parksaathi.model.Users;
 import com.parkar.parksaathi.security.JwtService;
 import com.parkar.parksaathi.service.parking.ParkingService;
@@ -36,10 +36,10 @@ public class ParkingController {
 
 
     @GetMapping(VERSION1 + "/detail/{parkingId}")
-    public ResponseEntity<ParkingSpotDetailResponse> getParkingDetail(
+    public ResponseEntity<ParkingDetailsResponse> getParkingDetail(
             @PathVariable Long parkingId) {
         try {
-            ParkingSpotDetailResponse detailResponse = parkingService.getParkingDetail(parkingId);
+            ParkingDetailsResponse detailResponse = parkingService.getParkingDetail(parkingId);
             return ResponseEntity.ok(detailResponse);
         } catch (IllegalArgumentException e) {
             log.atError().log("IllegalArgumentException thrown while getting Parking Details" + e);
@@ -51,12 +51,12 @@ public class ParkingController {
     }
 
     @GetMapping(VERSION1 + NEARBY_PARKING_ENDPOINT)
-    public ResponseEntity<List<ParkingSpotDetailResponse>> getNearbyParkingSpots(
+    public ResponseEntity<List<ParkingDetailsResponse>> getNearbyParkingSpots(
             @RequestParam Double latitude,
             @RequestParam Double longitude,
             @RequestParam(defaultValue = "3.0") Double radiusKm) {
         try {
-            List<ParkingSpotDetailResponse> nearbySpots = parkingService.getNearbyParkingSpots(
+            List<ParkingDetailsResponse> nearbySpots = parkingService.getNearbyParkingSpots(
                     latitude, longitude, radiusKm);
             return ResponseEntity.ok(nearbySpots);
         } catch (IllegalArgumentException e) {

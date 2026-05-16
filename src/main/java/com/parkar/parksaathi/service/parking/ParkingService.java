@@ -1,10 +1,10 @@
 package com.parkar.parksaathi.service.parking;
 
-import com.parkar.parksaathi.dto.request.AddParkingRequest;
-import com.parkar.parksaathi.dto.request.AddressDto;
-import com.parkar.parksaathi.dto.request.CreateParkingResponse;
-import com.parkar.parksaathi.dto.request.VehicleConfigDto;
-import com.parkar.parksaathi.dto.response.*;
+import com.parkar.parksaathi.dto.request.*;
+import com.parkar.parksaathi.dto.response.ParkingDetailsResponse;
+import com.parkar.parksaathi.dto.response.ParkingInfo;
+import com.parkar.parksaathi.dto.response.PricingAndCapacityInfo;
+import com.parkar.parksaathi.dto.response.RatingInfo;
 import com.parkar.parksaathi.enums.ListingStatus;
 import com.parkar.parksaathi.exception.customexceptions.InvalidLocationParametersException;
 import com.parkar.parksaathi.exception.customexceptions.ResourceNotFoundException;
@@ -165,72 +165,105 @@ public class ParkingService {
         return allAmenities;
     }
 
-    public ParkingSpotDetailResponse getParkingDetail(Long spotId) {
-        Parking parkingSpot = parkingRepository.findById(spotId)
-                .orElseThrow(() -> new ResourceNotFoundException("Parking spot not found with id: " + spotId));
-
-        // Get pricing from parking_vehicle_configs
-        Set<ParkingVehicleConfig> vehicleConfigs = parkingSpot.getVehicleConfigs();
-
-        // Calculate average pricing across all vehicle types
-        double avgHourly =  vehicleConfigs.stream()
-                .map(ParkingVehicleConfig::getHourlyRate)
-                .filter(Objects::nonNull)
-                .mapToDouble(BigDecimal::doubleValue)
-                .average().orElse(0.0);
-        double avgDaily = vehicleConfigs.stream()
-                .map(ParkingVehicleConfig::getDailyRate)
-                .filter(Objects::nonNull)
-                .mapToDouble(BigDecimal::doubleValue)
-                .average().orElse(0.0);
-        double avgWeekly =  vehicleConfigs.stream()
-                .map(ParkingVehicleConfig::getWeeklyRate)
-                .filter(Objects::nonNull)
-                .mapToDouble(BigDecimal::doubleValue)
-                .average().orElse(0.0);
-        double avgMonthly =  vehicleConfigs.stream()
-                .map(ParkingVehicleConfig::getMonthlyRate)
-                .filter(Objects::nonNull)
-                .mapToDouble(BigDecimal::doubleValue)
-                .average().orElse(0.0);
-
-        /* Fetch rating from parking_rating_aggregate or calculate from parking_ratings
-        ParkingRatingAggregate ratingAggregate = parkingRatingAggregateRepository.findByParkingId(spotId)
-                .orElse(ParkingRatingAggregate.builder()
-                        .averageRating(0.0)
-                        .totalRatings(0)
-                        .build());*/
-
-        return ParkingSpotDetailResponse.builder()
-                .parkingInfo(ParkingInfo.builder()
-                        .parkingId(String.valueOf(parkingSpot.getId()))
-                        .parkingName(parkingSpot.getDescription()) // Using description as name
-                        .parkingAddress(parkingSpot.getAddress().getAddressLine1() + ", " +
-                                parkingSpot.getAddress().getCity())
-                        .aboutParking(parkingSpot.getDescription())
-                        .amenities(parkingSpot.getAmenities().stream()
-                                .map(Amenity::getAmenityName)
-                                .collect(Collectors.toList()))
-                        .build())
-                .pricingInfo(PricingInfo.builder()
-                        .hourly(avgHourly)
-                        .daily(avgDaily)
-                        .weekly(avgWeekly)
-                        .monthly(avgMonthly)
-                        .build())
-                /* .rating(RatingInfo.builder()
-                         .rating(ratingAggregate.getAverageRating())
-                         .ratingCount(ratingAggregate.getTotalRatings())
-                         .build())*/
-                .availabilityInfo(AvailabilityInfo.builder()
-                        .weekly(!parkingSpot.getAvailabilityDays().isEmpty())
-                        .open24x7(parkingSpot.getIsOpen24Hours())
-                        .build())
+    /**
+     * This method will return the parking details on the basis of parking id
+     *
+     * @param parkingId
+     * @return
+     */
+    public ParkingDetailsResponse getParkingDetail(Long parkingId) {
+        Parking parking = parkingRepository.findById(parkingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Parking spot not found with id: " + parkingId));
+        return ParkingDetailsResponse.builder()
+                .parkingInfo(getParkingInfo(parking))
+                .availabilityInfo(getAvailabilityInfo(parking))
+                .pricingAndCapacityInfo(getPricingAndCapacityInfo(parking.getVehicleConfigs()))
+                .ratingInfo(getRatings(parking))
                 .build();
     }
 
+    /**
+     * This method will return the rating for the parking
+     *
+     * @param parking
+     * @return
+     */
+    private RatingInfo getRatings(Parking parking) {
+        //todo:  parking ratings will be returned with this method
+        return RatingInfo.builder().build();
+    }
 
-    public List<ParkingSpotDetailResponse> getNearbyParkingSpots(Double latitude, Double longitude, Double radiusKm) {
+    /**
+     * This method will return the pricing and capacity info for the parking
+     *
+     * @param vehicleConfigs
+     * @return
+     */
+    private PricingAndCapacityInfo getPricingAndCapacityInfo(Set<ParkingVehicleConfig> vehicleConfigs) {
+        Set<VehicleConfigWithTypeNameDto> vehicleConfigsWithName = vehicleConfigs.stream().map(e -> {
+            VehicleConfigWithTypeNameDto vehicleConfig = new VehicleConfigWithTypeNameDto();
+            vehicleConfig.setVehicleType(e.getVehicleType().getTypeName());
+            vehicleConfig.setMaxCapacity(e.getMaxCapacity());
+            vehicleConfig.setHourlyRate(e.getHourlyRate());
+            vehicleConfig.setDailyRate(e.getDailyRate());
+            vehicleConfig.setWeeklyRate(e.getWeeklyRate());
+            vehicleConfig.setMonthlyRate(e.getMonthlyRate());
+            return vehicleConfig;
+        }).collect(Collectors.toSet());
+        return PricingAndCapacityInfo.builder()
+                .vehicleConfigs(vehicleConfigsWithName).build();
+    }
+
+    /**
+     * This method will return the availability info for the parking
+     *
+     * @param parking
+     * @return
+     */
+    private AvailabilityDto getAvailabilityInfo(Parking parking) {
+        AvailabilityDto availabilityDto = new AvailabilityDto();
+        availabilityDto.setIsOpen24Hours(parking.getIsOpen24Hours());
+        availabilityDto.setStartTime(parking.getStartTime());
+        availabilityDto.setEndTime(parking.getEndTime());
+        availabilityDto.setAdStartDate(parking.getAdStartDate());
+        availabilityDto.setAdEndDate(parking.getAdEndDate());
+        availabilityDto.setDays(parking.getAvailabilityDays());
+        return availabilityDto;
+    }
+
+    /**
+     * This method will return the parking information
+     *
+     * @param parking
+     * @return
+     */
+    private ParkingInfo getParkingInfo(Parking parking) {
+        String address = getStringAddress(parking.getAddress());
+        return ParkingInfo.builder()
+                .id(parking.getId())
+                .name(parking.getName())
+                .description(parking.getDescription())
+                .status(String.valueOf(parking.getStatus()))
+                .address(address)
+                .emergencyContact(parking.getEmergencyContact())
+                .isApprovalRequired(parking.getIsApprovalRequired())
+                .amenities(parking.getAmenities().stream().map(
+                        e -> e.getAmenityName()).collect(Collectors.toSet()))
+                .build();
+    }
+
+    /**
+     * This method will return the address for the parking
+     *
+     * @param add
+     * @return
+     */
+    private String getStringAddress(Address add) {
+        return add.getAddressLine1() + " " + add.getAddressLine2() + " " + add.getCity() + " " + add.getState();
+    }
+
+
+    public List<ParkingDetailsResponse> getNearbyParkingSpots(Double latitude, Double longitude, Double radiusKm) {
         if (latitude == null || longitude == null || radiusKm == null || radiusKm <= 0) {
             throw new InvalidLocationParametersException("Invalid location parameters: latitude, longitude and radiusKm must be provided");
         }
@@ -245,7 +278,7 @@ public class ParkingService {
                 .collect(Collectors.toList());
     }
 
-    private ParkingSpotDetailResponse convertToDetailResponse(Parking parkingSpot) {
+    private ParkingDetailsResponse convertToDetailResponse(Parking parkingSpot) {
         // Get pricing from parking_vehicle_configs
         Set<ParkingVehicleConfig> vehicleConfigs = parkingSpot.getVehicleConfigs();
 
@@ -272,32 +305,33 @@ public class ParkingService {
                 .average().orElse(0.0);
 
         // Build response
-        return ParkingSpotDetailResponse.builder()
-                .parkingInfo(ParkingInfo.builder()
-                        .parkingId(String.valueOf(parkingSpot.getId()))
-                        .parkingName(parkingSpot.getDescription())
-                        .parkingAddress(parkingSpot.getAddress().getAddressLine1() + ", " +
-                                parkingSpot.getAddress().getCity())
-                        .aboutParking(parkingSpot.getDescription())
-                        .amenities(parkingSpot.getAmenities().stream()
-                                .map(Amenity::getAmenityName)
-                                .collect(Collectors.toList()))
-                        .build())
-                .pricingInfo(PricingInfo.builder()
-                        .hourly(avgHourly)
-                        .daily(avgDaily)
-                        .weekly(avgWeekly)
-                        .monthly(avgMonthly)
-                        .build())
-                .ratingInfo(RatingInfo.builder()
-                        .rating(4.5) // Default rating for now
-                        .ratingCount(0)
-                        .build())
-                .availabilityInfo(AvailabilityInfo.builder()
-                        .weekly(!parkingSpot.getAvailabilityDays().isEmpty())
-                        .open24x7(parkingSpot.getIsOpen24Hours())
-                        .build())
-                .build();
+        return null;
+//        return ParkingDetailsResponse.builder()
+//                .parkingInfo(ParkingInfo.builder()
+//                        .id(String.valueOf(parkingSpot.getId()))
+//                        .name(parkingSpot.getDescription())
+//                        .address(parkingSpot.getAddress().getAddressLine1() + ", " +
+//                                parkingSpot.getAddress().getCity())
+//                        .description(parkingSpot.getDescription())
+//                        .amenities(parkingSpot.getAmenities().stream()
+//                                .map(Amenity::getAmenityName)
+//                                .collect(Collectors.toList()))
+//                        .build())
+//                .pricingAndCapacityInfo(PricingAndCapacityInfo.builder()
+//                        .hourly(avgHourly)
+//                        .daily(avgDaily)
+//                        .weekly(avgWeekly)
+//                        .monthly(avgMonthly)
+//                        .build())
+//                .ratingInfo(RatingInfo.builder()
+//                        .rating(4.5) // Default rating for now
+//                        .ratingCount(0)
+//                        .build())
+//                .availabilityInfo(AvailabilityInfo.builder()
+//                        .weekly(!parkingSpot.getAvailabilityDays().isEmpty())
+//                        .open24x7(parkingSpot.getIsOpen24Hours())
+//                        .build())
+//                .build();
     }
 
 }

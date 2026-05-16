@@ -5,7 +5,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
+import java.util.Set;
 
 @Data
 public class AvailabilityDto {
@@ -14,5 +14,5 @@ public class AvailabilityDto {
     private LocalTime endTime;
     private LocalDate adStartDate;
     private LocalDate adEndDate;
-    private List<DayOfWeekEnum> days;
+    private Set<DayOfWeekEnum> days;
 }

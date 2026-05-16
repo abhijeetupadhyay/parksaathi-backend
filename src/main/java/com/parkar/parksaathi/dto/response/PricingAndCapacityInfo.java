@@ -1,17 +1,17 @@
 package com.parkar.parksaathi.dto.response;
 
+import com.parkar.parksaathi.dto.request.VehicleConfigWithTypeNameDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PricingInfo {
-    private Double hourly;
-    private Double daily;
-    private Double weekly;
-    private Double monthly;
+public class PricingAndCapacityInfo {
+    private Set<VehicleConfigWithTypeNameDto> vehicleConfigs;
 }

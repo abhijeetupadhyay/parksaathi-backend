@@ -3,11 +3,11 @@ package com.parkar.parksaathi.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.parkar.parksaathi.controller.parking.ParkingController;
 import com.parkar.parksaathi.dto.request.AddParkingRequest;
+import com.parkar.parksaathi.dto.request.AvailabilityDto;
 import com.parkar.parksaathi.dto.request.CreateParkingResponse;
-import com.parkar.parksaathi.dto.response.AvailabilityInfo;
 import com.parkar.parksaathi.dto.response.ParkingInfo;
-import com.parkar.parksaathi.dto.response.ParkingSpotDetailResponse;
-import com.parkar.parksaathi.dto.response.PricingInfo;
+import com.parkar.parksaathi.dto.response.ParkingDetailsResponse;
+import com.parkar.parksaathi.dto.response.PricingAndCapacityInfo;
 import com.parkar.parksaathi.model.Users;
 import com.parkar.parksaathi.service.parking.ParkingService;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -53,7 +54,7 @@ class ParkingControllerTest {
 
         // Setup mock user with ID = 1L
         mockUser = new Users();
-        mockUser.setId(1L);  // Ensure this is set
+        mockUser.setId(1L);
         mockUser.setEmail("test@example.com");
 
         // Setup security context
@@ -71,11 +72,10 @@ class ParkingControllerTest {
 
         CreateParkingResponse expectedResponse = CreateParkingResponse.builder()
                 .parkingId(expectedSpotId)
-                .message("Parking spot created successfully")
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        when(parkingService.addNewParking(any(AddParkingRequest.class), eq(1L)))
+        when(parkingService.addNewParking(any(AddParkingRequest.class), any(Users.class)))
                 .thenReturn(expectedResponse);
 
         // Act
@@ -86,45 +86,38 @@ class ParkingControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(expectedSpotId, response.getBody().getParkingId());
-        assertEquals("Parking spot created successfully", response.getBody().getMessage());
 
-        verify(parkingService, times(1)).addNewParking(request, 1L);
+        verify(parkingService, times(1)).addNewParking(request, mockUser);
     }
 
     @Test
     void getParkingDetail_Success() {
         // Arrange
         Long spotId = 123L;
-        ParkingSpotDetailResponse expectedResponse = ParkingSpotDetailResponse.builder()
+        ParkingDetailsResponse expectedResponse = ParkingDetailsResponse.builder()
                 .parkingInfo(ParkingInfo.builder()
-                        .parkingId("123")
-                        .parkingName("Test Parking")
-                        .parkingAddress("123 Test St")
-                        .aboutParking("Test Description")
-                        .amenities(Arrays.asList("CCTV", "Security"))
+                        .id(123L)
+                        .name("Test Parking")
+                        .address("123 Test St")
+                        .description("Test Description")
+                        .amenities(new HashSet<>(Arrays.asList("CCTV", "Security")))
                         .build())
-                .pricingInfo(PricingInfo.builder()
-                        .hourly(10.0)
-                        .daily(50.0)
-                        .weekly(300.0)
-                        .monthly(1000.0)
+                .pricingAndCapacityInfo(PricingAndCapacityInfo.builder()
+                        .vehicleConfigs(Collections.emptySet())
                         .build())
-                .availabilityInfo(AvailabilityInfo.builder()
-                        .weekly(true)
-                        .open24x7(false)
-                        .build())
+                .availabilityInfo(new AvailabilityDto())
                 .build();
 
         when(parkingService.getParkingDetail(spotId)).thenReturn(expectedResponse);
 
         // Act
-        ResponseEntity<ParkingSpotDetailResponse> response = parkingController.getParkingDetail(spotId);
+        ResponseEntity<ParkingDetailsResponse> response = parkingController.getParkingDetail(spotId);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("123", response.getBody().getParkingInfo().getParkingId());
-        assertEquals("Test Parking", response.getBody().getParkingInfo().getParkingName());
+        assertEquals(123L, response.getBody().getParkingInfo().getId());
+        assertEquals("Test Parking", response.getBody().getParkingInfo().getName());
 
         verify(parkingService, times(1)).getParkingDetail(spotId);
     }
@@ -137,7 +130,7 @@ class ParkingControllerTest {
                 .thenThrow(new IllegalArgumentException("Parking spot not found"));
 
         // Act
-        ResponseEntity<ParkingSpotDetailResponse> response = parkingController.getParkingDetail(spotId);
+        ResponseEntity<ParkingDetailsResponse> response = parkingController.getParkingDetail(spotId);
 
         // Assert
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -152,7 +145,7 @@ class ParkingControllerTest {
                 .thenThrow(new RuntimeException("Database error"));
 
         // Act
-        ResponseEntity<ParkingSpotDetailResponse> response = parkingController.getParkingDetail(spotId);
+        ResponseEntity<ParkingDetailsResponse> response = parkingController.getParkingDetail(spotId);
 
         // Assert
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
@@ -166,7 +159,7 @@ class ParkingControllerTest {
         Double longitude = -74.0060;
         Double radiusKm = 5.0;
 
-        List<ParkingSpotDetailResponse> expectedSpots = Arrays.asList(
+        List<ParkingDetailsResponse> expectedSpots = Arrays.asList(
                 createMockParkingSpotResponse("1", "Parking 1"),
                 createMockParkingSpotResponse("2", "Parking 2")
         );
@@ -175,7 +168,7 @@ class ParkingControllerTest {
                 .thenReturn(expectedSpots);
 
         // Act
-        ResponseEntity<List<ParkingSpotDetailResponse>> response =
+        ResponseEntity<List<ParkingDetailsResponse>> response =
                 parkingController.getNearbyParkingSpots(latitude, longitude, radiusKm);
 
         // Assert
@@ -197,7 +190,7 @@ class ParkingControllerTest {
                 .thenThrow(new IllegalArgumentException("Invalid parameters"));
 
         // Act
-        ResponseEntity<List<ParkingSpotDetailResponse>> response =
+        ResponseEntity<List<ParkingDetailsResponse>> response =
                 parkingController.getNearbyParkingSpots(latitude, longitude, radiusKm);
 
         // Assert
@@ -216,7 +209,7 @@ class ParkingControllerTest {
                 .thenThrow(new RuntimeException("Database connection error"));
 
         // Act
-        ResponseEntity<List<ParkingSpotDetailResponse>> response =
+        ResponseEntity<List<ParkingDetailsResponse>> response =
                 parkingController.getNearbyParkingSpots(latitude, longitude, radiusKm);
 
         // Assert
@@ -224,23 +217,19 @@ class ParkingControllerTest {
         assertNull(response.getBody());
     }
 
-    private ParkingSpotDetailResponse createMockParkingSpotResponse(String id, String name) {
-        return ParkingSpotDetailResponse.builder()
+    private ParkingDetailsResponse createMockParkingSpotResponse(String id, String name) {
+        return ParkingDetailsResponse.builder()
                 .parkingInfo(ParkingInfo.builder()
-                        .parkingId(id)
-                        .parkingName(name)
-                        .parkingAddress("Test Address")
-                        .aboutParking("Test Description")
-                        .amenities(Collections.emptyList())
+                        .id(Long.valueOf(id))
+                        .name(name)
+                        .address("Test Address")
+                        .description("Test Description")
+                        .amenities(Collections.emptySet())
                         .build())
-                .pricingInfo(PricingInfo.builder()
-                        .hourly(10.0)
-                        .daily(50.0)
+                .pricingAndCapacityInfo(PricingAndCapacityInfo.builder()
+                        .vehicleConfigs(Collections.emptySet())
                         .build())
-                .availabilityInfo(AvailabilityInfo.builder()
-                        .weekly(true)
-                        .open24x7(false)
-                        .build())
+                .availabilityInfo(new AvailabilityDto())
                 .build();
     }
 }
