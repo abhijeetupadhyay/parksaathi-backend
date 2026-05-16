@@ -3,6 +3,8 @@ package com.parkar.parksaathi.constant;
 public final class Constants {
 
     public static final String AUTH = "/auth";
+
+    public static final String USER = "/user";
     public static final String PARKING = "/parking";
     public static final String VERSION1 = "/v1";
     public static final String SEND_OTP_ENDPOINT = "/send-otp";
@@ -11,6 +13,8 @@ public final class Constants {
     public static final String REFRESH_ENDPOINT = "/refresh";
     public static final String SIGNOUT_ENDPOINT = "/signout";
     public static final String SIGNUP_ENDPOINT = "/signup";
+    public static final String UPDATE_USER_ENDPOINT = "/update";
+    public static final String UPDATE_USER_STATUS_ENDPOINT = "/status";
     public static final String CREATE_PARKING_ENDPOINT = "/new";
     public static final String NEARBY_PARKING_ENDPOINT = "/nearby";
 
