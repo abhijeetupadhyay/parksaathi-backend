@@ -5,9 +5,10 @@ import com.parkar.parksaathi.controller.parking.ParkingController;
 import com.parkar.parksaathi.dto.request.AddParkingRequest;
 import com.parkar.parksaathi.dto.request.AvailabilityDto;
 import com.parkar.parksaathi.dto.request.CreateParkingResponse;
-import com.parkar.parksaathi.dto.response.ParkingInfo;
 import com.parkar.parksaathi.dto.response.ParkingDetailsResponse;
+import com.parkar.parksaathi.dto.response.ParkingInfo;
 import com.parkar.parksaathi.dto.response.PricingAndCapacityInfo;
+import com.parkar.parksaathi.enums.UserStatus;
 import com.parkar.parksaathi.model.Users;
 import com.parkar.parksaathi.service.parking.ParkingService;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +32,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,6 +56,7 @@ class ParkingControllerTest {
         mockUser = new Users();
         mockUser.setId(1L);
         mockUser.setEmail("test@example.com");
+        mockUser.setStatus(UserStatus.ACTIVE);
 
         // Setup security context
         UsernamePasswordAuthenticationToken authentication =
@@ -111,7 +112,7 @@ class ParkingControllerTest {
         when(parkingService.getParkingDetail(spotId)).thenReturn(expectedResponse);
 
         // Act
-        ResponseEntity<ParkingDetailsResponse> response = parkingController.getParkingDetail(spotId);
+        ResponseEntity<ParkingDetailsResponse> response = parkingController.getParkingDetail(spotId, mockUser);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -130,7 +131,7 @@ class ParkingControllerTest {
                 .thenThrow(new IllegalArgumentException("Parking spot not found"));
 
         // Act
-        ResponseEntity<ParkingDetailsResponse> response = parkingController.getParkingDetail(spotId);
+        ResponseEntity<ParkingDetailsResponse> response = parkingController.getParkingDetail(spotId, mockUser);
 
         // Assert
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -145,7 +146,7 @@ class ParkingControllerTest {
                 .thenThrow(new RuntimeException("Database error"));
 
         // Act
-        ResponseEntity<ParkingDetailsResponse> response = parkingController.getParkingDetail(spotId);
+        ResponseEntity<ParkingDetailsResponse> response = parkingController.getParkingDetail(spotId, mockUser);
 
         // Assert
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
@@ -169,7 +170,7 @@ class ParkingControllerTest {
 
         // Act
         ResponseEntity<List<ParkingDetailsResponse>> response =
-                parkingController.getNearbyParkingSpots(latitude, longitude, radiusKm);
+                parkingController.getNearbyParkingSpots(latitude, longitude, radiusKm, mockUser);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -191,7 +192,7 @@ class ParkingControllerTest {
 
         // Act
         ResponseEntity<List<ParkingDetailsResponse>> response =
-                parkingController.getNearbyParkingSpots(latitude, longitude, radiusKm);
+                parkingController.getNearbyParkingSpots(latitude, longitude, radiusKm, mockUser);
 
         // Assert
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
@@ -210,7 +211,7 @@ class ParkingControllerTest {
 
         // Act
         ResponseEntity<List<ParkingDetailsResponse>> response =
-                parkingController.getNearbyParkingSpots(latitude, longitude, radiusKm);
+                parkingController.getNearbyParkingSpots(latitude, longitude, radiusKm, mockUser);
 
         // Assert
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());

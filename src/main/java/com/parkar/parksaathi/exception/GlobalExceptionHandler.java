@@ -86,6 +86,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
+    @ExceptionHandler(BadInputException.class)
+    public ResponseEntity<ApiErrorResponse> handleBadInputException(BadInputException e) {
+        String message = e.getMessage();
+
+        log.warn("Validation failed: {}", message);
+
+        ApiErrorResponse error = ApiErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Bad Request")
+                .message(message)
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleException(Exception e) {
         log.error("Unhandled exception occurred", e);
