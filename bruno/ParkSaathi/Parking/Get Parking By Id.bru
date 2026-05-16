@@ -1,0 +1,23 @@
+meta {
+  name: Get Parking By Id
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/parking/v1/detail/4
+  body: none
+  auth: inherit
+}
+
+headers {
+  x-parksaathi-device: mobile
+  x-parksaathi-correlation-id: {{correlationId}}
+  x-parksaathi-version: 1.0.0
+  x-parksaathi-authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJwaG9uZSI6IjEyMzQ1Njc4OTAiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzc4OTA4OTIxLCJleHAiOjE3Nzg5MDk4MjF9.-fFJBRL6d7gVE67LYCTRjI9Zfq-CSgBpAac8PiVv1DfMu1B4IIj_fpZ1FyQ4hNffMX71aHi3NgidbXo012X3kQ
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

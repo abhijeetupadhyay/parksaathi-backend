@@ -3,6 +3,8 @@ package com.parkar.parksaathi.service;
 import com.parkar.parksaathi.dto.request.SignupRequest;
 import com.parkar.parksaathi.dto.response.AuthResponse;
 import com.parkar.parksaathi.enums.UserStatus;
+import com.parkar.parksaathi.exception.customexceptions.ResourceNotFoundException;
+import com.parkar.parksaathi.exception.customexceptions.TokenRefreshException;
 import com.parkar.parksaathi.model.RefreshToken;
 import com.parkar.parksaathi.model.Users;
 import com.parkar.parksaathi.repository.UserRepository;
@@ -18,8 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -129,10 +130,34 @@ class AuthServiceTest {
     }
 
     @Test
-    void testSignOut() {
-        doReturn("USER_SIGNED_OUT").when(refreshTokenService).revokeRefreshToken("sample-refresh-token");
-        authService.signOut("sample-refresh-token");
-        verify(refreshTokenService, times(1)).revokeRefreshToken("sample-refresh-token");
+    void testRefreshToken_TokenNotFound() {
+        when(refreshTokenService.findByToken("invalid")).thenReturn(Optional.empty());
+        assertThrows(TokenRefreshException.class, 
+                () -> authService.refreshToken("invalid"));
+    }
+
+    @Test
+    void testRefreshToken_UserNotFound() {
+        when(refreshTokenService.findByToken("token")).thenReturn(Optional.of(testRefreshToken));
+        when(refreshTokenService.rotateRefreshToken(testRefreshToken)).thenReturn(new RefreshToken());
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, 
+                () -> authService.refreshToken("token"));
+    }
+
+    @Test
+    void testSignOut_Success() {
+        when(refreshTokenService.revokeRefreshToken("sample-refresh-token")).thenReturn(com.parkar.parksaathi.constant.Constants.REFRESH_TOKEN_REVOKED);
+        String result = authService.signOut("sample-refresh-token");
+        assertEquals("USER_SIGNED_OUT", result);
+    }
+
+    @Test
+    void testSignOut_Fail() {
+        when(refreshTokenService.revokeRefreshToken("token")).thenReturn("FAILED");
+        String result = authService.signOut("token");
+        assertEquals("FAILED", result);
     }
 
     @Test

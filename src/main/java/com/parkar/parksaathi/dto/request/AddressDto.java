@@ -10,7 +10,6 @@ public class AddressDto {
     private String addressLine2;
     private String city;
     private String state;
-    private String pincode;
     private BigDecimal latitude;
     private BigDecimal longitude;
 }

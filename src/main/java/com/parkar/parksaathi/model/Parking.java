@@ -31,6 +31,9 @@ public class Parking {
     @JoinColumn(name = "address_id")
     private Address address;
 
+    @Column(name = "name", columnDefinition = "TEXT")
+    private String name;
+
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
@@ -39,6 +42,9 @@ public class Parking {
 
     @Column(name = "is_open_24_hours")
     private Boolean isOpen24Hours = false;
+
+    @Column(name = "is_approval_required")
+    private Boolean isApprovalRequired = false;
 
     @Column(name = "start_time")
     private LocalTime startTime;

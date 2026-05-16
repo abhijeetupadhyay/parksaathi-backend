@@ -9,9 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PricingInfo {
-    private Double hourly;
-    private Double daily;
-    private Double weekly;
-    private Double monthly;
+public class ParkingOwner {
+    private String name;
+    private String phone;
+    private String aadhar;
+    private String email;
+    private String status;
 }

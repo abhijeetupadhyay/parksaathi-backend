@@ -1,11 +1,11 @@
 meta {
-  name: createParking 1
+  name: Create Parking
   type: http
-  seq: 5
+  seq: 4
 }
 
 post {
-  url: {{baseUrl}}/parking/v1/spots/new
+  url: {{baseUrl}}/parking/v1/new
   body: json
   auth: inherit
 }
@@ -21,15 +21,19 @@ headers {
   x-parksaathi-device: mobile
   x-parksaathi-correlation-id: {{correlationId}}
   x-parksaathi-version: 1.0.0
-  x-parksaathi-authtoken: 12233456576
+  x-parksaathi-authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJwaG9uZSI6IjEyMzQ1Njc4OTAiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzc4OTA4OTIxLCJleHAiOjE3Nzg5MDk4MjF9.-fFJBRL6d7gVE67LYCTRjI9Zfq-CSgBpAac8PiVv1DfMu1B4IIj_fpZ1FyQ4hNffMX71aHi3NgidbXo012X3kQ
 }
 
 body:json {
   {
+    "status": "ACTIVE",
+    "name": "Parking1",
     "description": "Basic parking spot",
-    "emergencyContact": "+91-9876543210",
+    "emergencyContact": "+91 1234567890",
+    "isApprovalRequired": true,
     "address": {
       "addressLine1": "456 Park Road",
+      "addressLine2": "123 Parking Road",
       "city": "Delhi",
       "state": "Delhi",
       "pincode": "110001",
@@ -40,6 +44,8 @@ body:json {
       "isOpen24Hours": true,
       "adStartDate": "2024-01-01",
       "adEndDate": "2024-06-30",
+      "startTime": "12:00:00",
+      "endTime": "22:00:00",
       "days": ["MON", "TUE", "WED", "THU", "FRI"]
     },
     "amenities": [
@@ -49,7 +55,18 @@ body:json {
       {
         "vehicleTypeId": 1,
         "maxCapacity": 10,
-        "hourlyRate": 15.00
+        "hourlyRate": 15.00,
+        "dailyRate": 25.00,
+        "weeklyRate": 35.00,
+        "monthlyRate": 55.00
+      },
+      {
+        "vehicleTypeId": 2,
+        "maxCapacity": 20,
+        "hourlyRate": 25.00,
+        "dailyRate": 45.00,
+        "weeklyRate": 65.00,
+        "monthlyRate": 85.00
       }
     ]
   }

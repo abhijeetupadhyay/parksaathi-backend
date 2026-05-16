@@ -1,3 +1,27 @@
+-- Drop triggers
+DROP TRIGGER IF EXISTS update_pricing_updated_at ON pricing;
+DROP TRIGGER IF EXISTS update_parking_images_updated_at ON parking_images;
+DROP TRIGGER IF EXISTS update_parking_updated_at ON parking;
+DROP TRIGGER IF EXISTS update_vehicles_updated_at ON vehicles;
+DROP TRIGGER IF EXISTS update_address_updated_at ON address;
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
+
+-- Drop tables in dependency order
+DROP TABLE IF EXISTS pricing CASCADE;
+DROP TABLE IF EXISTS parking_amenities_mapping CASCADE;
+DROP TABLE IF EXISTS parking_availability_days CASCADE;
+DROP TABLE IF EXISTS parking_vehicle_configs CASCADE;
+DROP TABLE IF EXISTS parking_images CASCADE;
+DROP TABLE IF EXISTS parking CASCADE;
+DROP TABLE IF EXISTS vehicles CASCADE;
+DROP TABLE IF EXISTS amenity CASCADE;
+DROP TABLE IF EXISTS vehicle_type CASCADE;
+DROP TABLE IF EXISTS address CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
+-- Drop function
+DROP FUNCTION IF EXISTS update_updated_at_column CASCADE;
+
 -- Function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -75,7 +99,7 @@ CREATE TABLE IF NOT EXISTS parking (
     description TEXT,
     emergency_contact VARCHAR(20),
     is_open_24_hours BOOLEAN DEFAULT FALSE,
-    approval_required BOOLEAN DEFAULT FALSE,
+    is_approval_required BOOLEAN DEFAULT FALSE,
     start_time TIME,
     end_time TIME,
     ad_start_date DATE NOT NULL,
