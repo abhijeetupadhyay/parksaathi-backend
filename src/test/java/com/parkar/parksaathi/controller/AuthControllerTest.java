@@ -1,7 +1,6 @@
 package com.parkar.parksaathi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.parkar.parksaathi.controller.auth.AuthController;
 import com.parkar.parksaathi.dto.request.RefreshTokenRequest;
 import com.parkar.parksaathi.dto.request.SendOtpRequest;
 import com.parkar.parksaathi.dto.request.SignupRequest;

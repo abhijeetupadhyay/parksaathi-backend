@@ -1,4 +1,4 @@
-package com.parkar.parksaathi.controller.parking;
+package com.parkar.parksaathi.controller;
 
 import com.parkar.parksaathi.dto.request.AddParkingRequest;
 import com.parkar.parksaathi.dto.request.CreateParkingResponse;
@@ -44,7 +44,7 @@ public class ParkingController {
     public ResponseEntity<ParkingDetailsResponse> getParkingDetail(
             @PathVariable Long parkingId, @AuthenticationPrincipal Users currentUser) {
         if (!currentUser.getStatus().equals(UserStatus.ACTIVE)) {
-            throw new BadInputException("User is not active for creating new parking");
+            throw new BadInputException("User is not active for fetching parking details");
         }
         try {
             ParkingDetailsResponse detailResponse = parkingService.getParkingDetail(parkingId);
@@ -64,7 +64,7 @@ public class ParkingController {
             @RequestParam Double longitude,
             @RequestParam(defaultValue = "3.0") Double radiusKm, @AuthenticationPrincipal Users currentUser) {
         if (!currentUser.getStatus().equals(UserStatus.ACTIVE)) {
-            throw new BadInputException("User is not active for creating new parking");
+            throw new BadInputException("User is not active for fetching nearby parkings");
         }
         try {
             List<ParkingDetailsResponse> nearbySpots = parkingService.getNearbyParkingSpots(

@@ -1,7 +1,6 @@
 package com.parkar.parksaathi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.parkar.parksaathi.controller.parking.ParkingController;
 import com.parkar.parksaathi.dto.request.AddParkingRequest;
 import com.parkar.parksaathi.dto.request.AvailabilityDto;
 import com.parkar.parksaathi.dto.request.CreateParkingResponse;

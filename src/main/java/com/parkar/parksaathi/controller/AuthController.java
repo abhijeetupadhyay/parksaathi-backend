@@ -1,4 +1,4 @@
-package com.parkar.parksaathi.controller.auth;
+package com.parkar.parksaathi.controller;
 
 import com.parkar.parksaathi.dto.request.RefreshTokenRequest;
 import com.parkar.parksaathi.dto.request.SendOtpRequest;
@@ -7,7 +7,6 @@ import com.parkar.parksaathi.dto.request.VerifyOtpRequest;
 import com.parkar.parksaathi.dto.response.APIResponse;
 import com.parkar.parksaathi.dto.response.AuthResponse;
 import com.parkar.parksaathi.dto.response.SendOtpResponse;
-import com.parkar.parksaathi.enums.UserStatus;
 import com.parkar.parksaathi.service.auth.AuthService;
 import com.parkar.parksaathi.service.auth.OtpService;
 import jakarta.validation.Valid;
