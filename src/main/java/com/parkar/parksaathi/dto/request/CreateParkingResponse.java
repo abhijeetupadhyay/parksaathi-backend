@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class CreateParkingResponse {
     private Long parkingId;
-    private String message;
     private LocalDateTime createdAt;
 
 }

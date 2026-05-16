@@ -30,7 +30,7 @@ public class ParkingController {
     public ResponseEntity<CreateParkingResponse> createParking(
             @RequestBody AddParkingRequest request,
             @AuthenticationPrincipal Users currentUser) {
-        CreateParkingResponse response = parkingService.addNewParking(request, currentUser.getId());
+        CreateParkingResponse response = parkingService.addNewParking(request, currentUser);
         return ResponseEntity.ok(response);
     }
 

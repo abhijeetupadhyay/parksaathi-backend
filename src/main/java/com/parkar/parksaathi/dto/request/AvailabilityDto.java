@@ -9,7 +9,7 @@ import java.util.List;
 
 @Data
 public class AvailabilityDto {
-    private boolean isOpen24Hours;
+    private Boolean isOpen24Hours;
     private LocalTime startTime;
     private LocalTime endTime;
     private LocalDate adStartDate;
